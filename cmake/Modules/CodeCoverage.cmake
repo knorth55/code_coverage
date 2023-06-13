@@ -127,7 +127,7 @@ function(ADD_CODE_COVERAGE)
 
     set(options NONE)
     set(oneValueArgs NAME)
-    set(multiValueArgs DEPENDENCIES)
+    set(multiValueArgs DEPENDENCIES;EXCLUDES)
     cmake_parse_arguments(Coverage "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     if(NOT LCOV_PATH)
@@ -173,7 +173,7 @@ function(ADD_CODE_COVERAGE)
         COMMAND ${LCOV_PATH} ${LCOV_EXTRA_FLAGS} --directory . --capture --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info
         # add baseline counters
         COMMAND ${LCOV_PATH} -a ${PROJECT_BINARY_DIR}/${Coverage_NAME}.base -a ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}.total || (exit 0)
-        COMMAND ${LCOV_PATH} --remove ${PROJECT_BINARY_DIR}/${Coverage_NAME}.total ${COVERAGE_EXCLUDES} --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.removed || (exit 0)
+        COMMAND ${LCOV_PATH} --remove ${PROJECT_BINARY_DIR}/${Coverage_NAME}.total ${Coverage_EXCLUDES} --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.removed || (exit 0)
         COMMAND ${LCOV_PATH} --extract ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.removed "'*/${PROJECT_NAME}/*'" --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.cleaned || (exit 0)
         COMMAND ${GENHTML_PATH} ${GENHTML_EXTRA_FLAGS} -o ${Coverage_NAME} ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.cleaned || (exit 0)
         COMMAND ${CMAKE_COMMAND} -E remove ${PROJECT_BINARY_DIR}/${Coverage_NAME}.base ${PROJECT_BINARY_DIR}/${Coverage_NAME}.total || (exit 0)
@@ -190,9 +190,9 @@ function(ADD_CODE_COVERAGE)
         COMMAND if [ -f ${PROJECT_BINARY_DIR}/.coverage ]\; then mv ${PROJECT_BINARY_DIR}/.coverage ${PROJECT_BINARY_DIR}/.coverage.nosetests\; fi
         COMMAND cp ${PROJECT_BINARY_DIR}/.coverage* ${COVERAGE_DIR}/ || echo "WARNING: No python coverage!"
         COMMAND ${PYTHON_COVERAGE_PATH} combine || echo "WARNING: No python coverage to combine!"
-        COMMAND ${PYTHON_COVERAGE_PATH} report --include "*${REAL_SOURCE_DIR}*" --omit ${COVERAGE_EXCLUDES} || echo "WARNING: no python report to output"
-        COMMAND ${PYTHON_COVERAGE_PATH} xml    --include "*${REAL_SOURCE_DIR}*" --omit ${COVERAGE_EXCLUDES} || echo "WARNING: No python xml to output"
-        COMMAND ${PYTHON_COVERAGE_PATH} html   --include "*${REAL_SOURCE_DIR}*" --omit ${COVERAGE_EXCLUDES} || echo "WARNING: No python html to output"
+        COMMAND ${PYTHON_COVERAGE_PATH} report --include "*${REAL_SOURCE_DIR}*" --omit ${Coverage_EXCLUDES} || echo "WARNING: no python report to output"
+        COMMAND ${PYTHON_COVERAGE_PATH} xml    --include "*${REAL_SOURCE_DIR}*" --omit ${Coverage_EXCLUDES} || echo "WARNING: No python xml to output"
+        COMMAND ${PYTHON_COVERAGE_PATH} html   --include "*${REAL_SOURCE_DIR}*" --omit ${Coverage_EXCLUDES} || echo "WARNING: No python html to output"
         WORKING_DIRECTORY ${COVERAGE_DIR}
         DEPENDS _run_tests_${PROJECT_NAME}
     )
