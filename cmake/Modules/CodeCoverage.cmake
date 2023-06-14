@@ -177,6 +177,7 @@ function(ADD_CODE_COVERAGE)
         COMMAND ${LCOV_PATH} --extract ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.removed "'*/${PROJECT_NAME}/*'" --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.cleaned || (exit 0)
         COMMAND ${GENHTML_PATH} ${GENHTML_EXTRA_FLAGS} -o ${Coverage_NAME} ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.cleaned || (exit 0)
         COMMAND ${CMAKE_COMMAND} -E remove ${PROJECT_BINARY_DIR}/${Coverage_NAME}.base ${PROJECT_BINARY_DIR}/${Coverage_NAME}.total || (exit 0)
+        COMMAND cp ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.cleaned ${PROJECT_BINARY_DIR}/${Coverage_NAME}_cpp.info || (exit 0)
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
         DEPENDS _run_tests_${PROJECT_NAME}
     )
@@ -200,8 +201,8 @@ function(ADD_CODE_COVERAGE)
         COMMAND ${PYTHON_COVERAGE_PATH} report --include "*${REAL_SOURCE_DIR}*" ${OMIT_FLAGS} || echo "WARNING: no python report to output"
         COMMAND ${PYTHON_COVERAGE_PATH} xml  -o ${Coverage_NAME}_python.xml --include "*${REAL_SOURCE_DIR}*" ${OMIT_FLAGS} || echo "WARNING: No python xml to output"
         COMMAND ${PYTHON_COVERAGE_PATH} html -d ${Coverage_NAME}_python_html --include "*${REAL_SOURCE_DIR}*" ${OMIT_FLAGS} || echo "WARNING: No python html to output"
-        COMMAND cp ${COVERAGE_DIR}/${Coverage_NAME}_python.xml ${PROJECT_BINARY_DIR}
-        COMMAND cp -r ${COVERAGE_DIR}/${Coverage_NAME}_python_html ${PROJECT_BINARY_DIR}
+        COMMAND cp ${COVERAGE_DIR}/${Coverage_NAME}_python.xml ${PROJECT_BINARY_DIR} || echo "WARNING: No python xml to copy"
+        COMMAND cp -r ${COVERAGE_DIR}/${Coverage_NAME}_python_html ${PROJECT_BINARY_DIR} || echo "WARNING: No python html to copy"
         WORKING_DIRECTORY ${COVERAGE_DIR}
         DEPENDS _run_tests_${PROJECT_NAME}
     )
