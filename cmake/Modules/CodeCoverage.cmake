@@ -198,8 +198,10 @@ function(ADD_CODE_COVERAGE)
         COMMAND cp ${PROJECT_BINARY_DIR}/.coverage* ${COVERAGE_DIR}/ || echo "WARNING: No python coverage!"
         COMMAND ${PYTHON_COVERAGE_PATH} combine || echo "WARNING: No python coverage to combine!"
         COMMAND ${PYTHON_COVERAGE_PATH} report --include "*${REAL_SOURCE_DIR}*" ${OMIT_FLAGS} || echo "WARNING: no python report to output"
-        COMMAND ${PYTHON_COVERAGE_PATH} xml    --include "*${REAL_SOURCE_DIR}*" ${OMIT_FLAGS} || echo "WARNING: No python xml to output"
-        COMMAND ${PYTHON_COVERAGE_PATH} html   --include "*${REAL_SOURCE_DIR}*" ${OMIT_FLAGS} || echo "WARNING: No python html to output"
+        COMMAND ${PYTHON_COVERAGE_PATH} xml  -o ${Coverage_NAME}_python.xml --include "*${REAL_SOURCE_DIR}*" ${OMIT_FLAGS} || echo "WARNING: No python xml to output"
+        COMMAND ${PYTHON_COVERAGE_PATH} html -d ${Coverage_NAME}_python_html --include "*${REAL_SOURCE_DIR}*" ${OMIT_FLAGS} || echo "WARNING: No python html to output"
+        COMMAND cp ${COVERAGE_DIR}/${Coverage_NAME}_python.xml ${PROJECT_BINARY_DIR}
+        COMMAND cp -r ${COVERAGE_DIR}/${Coverage_NAME}_python_html ${PROJECT_BINARY_DIR}
         WORKING_DIRECTORY ${COVERAGE_DIR}
         DEPENDS _run_tests_${PROJECT_NAME}
     )
