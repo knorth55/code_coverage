@@ -224,20 +224,13 @@ function(ADD_CODE_COVERAGE)
     # Show where to find the lcov info report
     add_custom_command(TARGET ${Coverage_NAME} POST_BUILD
         COMMAND ;
-        COMMENT "Lcov code coverage info report saved in ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info."
-    )
-
-    # Show info where to find the C++ report
-    add_custom_command(TARGET ${Coverage_NAME} POST_BUILD
-        COMMAND ;
-        COMMENT "Open ${PROJECT_BINARY_DIR}/${Coverage_NAME}/index.html in your browser to view the coverage report."
+        COMMENT "Lcov code coverage info report saved in ${PROJECT_BINARY_DIR}/${Coverage_NAME}_cpp.info."
     )
 
     # Show info where to find the Python report
     add_custom_command(TARGET ${Coverage_NAME} POST_BUILD
         COMMAND ;
-        COMMENT "Python code coverage info saved in ${COVERAGE_DIR} directory."
-        COMMENT "Python code coverage html-format: ${COVERAGE_DIR}/htmlcov/index.html."
+        COMMENT "Python code coverage info saved in {PROJECT_BINARY_DIR}/${Coverage_NAME}_python.xml and {PROJECT_BINARY_DIR}/${Coverage_NAME}_nosetests_python.xml ."
     )
 
 endfunction() # SETUP_TARGET_FOR_COVERAGE
