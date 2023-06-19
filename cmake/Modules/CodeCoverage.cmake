@@ -168,11 +168,15 @@ function(ADD_CODE_COVERAGE)
         # Capturing lcov counters and generating report
         COMMAND ${LCOV_PATH} ${LCOV_EXTRA_FLAGS} --directory . --capture --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info
         # add baseline counters
-        COMMAND ${LCOV_PATH} -a ${PROJECT_BINARY_DIR}/${Coverage_NAME}.base -a ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}.total || (exit 0)
-        COMMAND ${LCOV_PATH} --remove ${PROJECT_BINARY_DIR}/${Coverage_NAME}.total ${Coverage_EXCLUDES} --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.removed || (exit 0)
-        COMMAND ${LCOV_PATH} --extract ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.removed "'*/${PROJECT_NAME}/*'" --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.cleaned || (exit 0)
-        COMMAND ${CMAKE_COMMAND} -E remove ${PROJECT_BINARY_DIR}/${Coverage_NAME}.base ${PROJECT_BINARY_DIR}/${Coverage_NAME}.total || (exit 0)
-        COMMAND cp ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.cleaned ${PROJECT_BINARY_DIR}/${Coverage_NAME}_cpp.info || (exit 0)
+        COMMAND ${LCOV_PATH} -a ${PROJECT_BINARY_DIR}/${Coverage_NAME}.base -a ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}.total || echo "WARNING: Not cpp report to output"
+        COMMAND ${LCOV_PATH} --remove ${PROJECT_BINARY_DIR}/${Coverage_NAME}.total ${Coverage_EXCLUDES} --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.removed ||  echo "WARNING: Not cpp report to output"
+        COMMAND ${LCOV_PATH} --extract ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.removed "'*/${PROJECT_NAME}/*'" --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.cleaned || echo "WARNING: Not cpp report to output"
+        COMMAND ${CMAKE_COMMAND} -E remove ${PROJECT_BINARY_DIR}/${Coverage_NAME}.base ${PROJECT_BINARY_DIR}/${Coverage_NAME}.total || echo "WARNING: Not cpp report to output"
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/cpp_coverage || echo "WARNING: Error to create cpp coverage dir" || echo "WARNING: Error to create cpp coverage dir"
+        COMMAND cp ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.cleaned ${PROJECT_BINARY_DIR}/${Coverage_NAME}_cpp.info || echo "WARNING: Not cpp report to copy"
+        COMMAND mv ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info ${PROJECT_BINARY_DIR}/cpp_coverage || echo "WARNING: Not cpp report to move"
+        COMMAND mv ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.removed ${PROJECT_BINARY_DIR}/cpp_coverage || echo "WARNING: Not cpp report to move"
+        COMMAND mv ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.cleaned ${PROJECT_BINARY_DIR}/cpp_coverage || echo "WARNING: Not cpp report to move"
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
         DEPENDS _run_tests_${PROJECT_NAME}
     )
@@ -191,6 +195,8 @@ function(ADD_CODE_COVERAGE)
         OUTPUT ${PROJECT_BINARY_DIR}/${Coverage_NAME}_nosetests_python.xml
         COMMAND ${PYTHON_COVERAGE_PATH} report --include "*${REAL_SOURCE_DIR}*" ${OMIT_FLAGS} || echo "WARNING: No python nosetests report to output"
         COMMAND ${PYTHON_COVERAGE_PATH} xml  -o ${Coverage_NAME}_nosetests_python.xml --include "*${REAL_SOURCE_DIR}*" ${OMIT_FLAGS} || echo "WARNING: No python nosetests xml to output"
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/python_nosetests_coverage/ || echo "WARNING: Error to create python nosetests coverage dir"
+        COMMAND mv ${PROJECT_BINARY_DIR}/.coverage* ${PROJECT_BINARY_DIR}/python_nosetests_coverage/ || echo "WARNING: No python nosetests report to move"
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
         DEPENDS _run_tests_${PROJECT_NAME}
     )
@@ -202,8 +208,10 @@ function(ADD_CODE_COVERAGE)
         COMMAND ${PYTHON_COVERAGE_PATH} combine || echo "WARNING: No python coverage to combine"
         COMMAND ${PYTHON_COVERAGE_PATH} report --include "*${REAL_SOURCE_DIR}*" ${OMIT_FLAGS} || echo "WARNING: No python report to output"
         COMMAND ${PYTHON_COVERAGE_PATH} xml  -o ${Coverage_NAME}_python.xml --include "*${REAL_SOURCE_DIR}*" ${OMIT_FLAGS} || echo "WARNING: No python xml to output"
-        COMMAND cp ${COVERAGE_DIR}/${Coverage_NAME}_python.xml ${PROJECT_BINARY_DIR}/ || echo "WARNING: No python xml"
-        COMMAND cp ${COVERAGE_DIR}/.coverage* ${PROJECT_BINARY_DIR}/ || echo "WARNING: No python coverage"
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/python_roslaunch_coverage/ || echo "WARNING: Error to create python roslaunch coverage dir"
+        COMMAND cp ${COVERAGE_DIR}/${Coverage_NAME}_python.xml ${PROJECT_BINARY_DIR}/ || echo "WARNING: No python xml to copy"
+        COMMAND cp ${COVERAGE_DIR}/.coverage* ${PROJECT_BINARY_DIR}/python_roslaunch_coverage/ || echo "WARNING: No python coverage to copy"
+        COMMAND cp ${COVERAGE_DIR}/${Coverage_NAME}_python.xml ${PROJECT_BINARY_DIR}/python_roslaunch_coverage || echo "WARNING: No python xml to copy"
         WORKING_DIRECTORY ${COVERAGE_DIR}
         DEPENDS ${PROJECT_BINARY_DIR}/${Coverage_NAME}_nosetests_python.xml
     )
