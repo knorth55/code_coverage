@@ -173,7 +173,8 @@ function(ADD_CODE_COVERAGE)
         # Capturing lcov counters and generating report
         COMMAND ${LCOV_PATH} ${LCOV_EXTRA_FLAGS} --directory . --capture --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info
         # add baseline counters
-        COMMAND ${LCOV_PATH} -a ${PROJECT_BINARY_DIR}/${Coverage_NAME}.base -a ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}.total || echo "WARNING: Not cpp report to output"
+        COMMAND ${LCOV_PATH} -a ${PROJECT_BINARY_DIR}/${Coverage_NAME}.base -a ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info
+                --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}.total || echo "WARNING: Not cpp report to output"
         COMMAND ${LCOV_PATH} --remove ${PROJECT_BINARY_DIR}/${Coverage_NAME}.total ${LCOV_REMOVES}
                 --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.removed ||  echo "WARNING: Not cpp report to output"
         COMMAND ${LCOV_PATH} --extract ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.removed "'*${REAL_SOURCE_DIR}*'"
