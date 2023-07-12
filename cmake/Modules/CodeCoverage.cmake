@@ -245,7 +245,7 @@ function(ADD_CODE_COVERAGE)
     # Show info where to find the Python report
     add_custom_command(TARGET ${Coverage_NAME} POST_BUILD
         COMMAND ;
-        COMMENT "Python code coverage info saved in {PROJECT_BINARY_DIR}/${Coverage_NAME}_python.xml and {PROJECT_BINARY_DIR}/${Coverage_NAME}_nosetests_python.xml ."
+        COMMENT "Python code coverage info saved in ${PROJECT_BINARY_DIR}/${Coverage_NAME}_python.xml,${Coverage_NAME}_nosetests_python.xml,${Coverage_NAME}_pytests_python.xml."
     )
 
 endfunction() # SETUP_TARGET_FOR_COVERAGE
