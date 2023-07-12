@@ -161,6 +161,11 @@ function(ADD_CODE_COVERAGE)
     add_dependencies(_run_tests_${PROJECT_NAME} ${Coverage_NAME}_cleanup_cpp)
     add_dependencies(_run_tests_${PROJECT_NAME} ${Coverage_NAME}_cleanup_py)
 
+    # Ensure that the include component uses the correct path for symlinked source directories
+    get_filename_component(REAL_SOURCE_DIR ${PROJECT_SOURCE_DIR} REALPATH)
+
+    set(LCOV_REMOVES "'*${REAL_SOURCE_DIR}/test/*'" "'*${REAL_SOURCE_DIR}/tests/*'" "'*${REAL_SOURCE_DIR}/${PROJECT_NAME}/test/*'" "'*${REAL_SOURCE_DIR}/${PROJECT_NAME}/tests/*'" ${Coverage_EXCLUDES})
+
     # Create C++ coverage report
     add_custom_command(
         OUTPUT ${PROJECT_BINARY_DIR}/${Coverage_NAME}_cpp.info
@@ -168,9 +173,12 @@ function(ADD_CODE_COVERAGE)
         # Capturing lcov counters and generating report
         COMMAND ${LCOV_PATH} ${LCOV_EXTRA_FLAGS} --directory . --capture --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info
         # add baseline counters
-        COMMAND ${LCOV_PATH} -a ${PROJECT_BINARY_DIR}/${Coverage_NAME}.base -a ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}.total || echo "WARNING: Not cpp report to output"
-        COMMAND ${LCOV_PATH} --remove ${PROJECT_BINARY_DIR}/${Coverage_NAME}.total ${Coverage_EXCLUDES} --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.removed ||  echo "WARNING: Not cpp report to output"
-        COMMAND ${LCOV_PATH} --extract ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.removed "'*/${PROJECT_NAME}/*'" --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.cleaned || echo "WARNING: Not cpp report to output"
+        COMMAND ${LCOV_PATH} -a ${PROJECT_BINARY_DIR}/${Coverage_NAME}.base -a ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info
+                --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}.total || echo "WARNING: Not cpp report to output"
+        COMMAND ${LCOV_PATH} --remove ${PROJECT_BINARY_DIR}/${Coverage_NAME}.total ${LCOV_REMOVES}
+                --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.removed ||  echo "WARNING: Not cpp report to output"
+        COMMAND ${LCOV_PATH} --extract ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.removed "'*${REAL_SOURCE_DIR}*'"
+                --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.cleaned || echo "WARNING: Not cpp report to output"
         COMMAND ${CMAKE_COMMAND} -E remove ${PROJECT_BINARY_DIR}/${Coverage_NAME}.base ${PROJECT_BINARY_DIR}/${Coverage_NAME}.total || echo "WARNING: Not cpp report to output"
         COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/cpp_coverage || echo "WARNING: Error to create cpp coverage dir" || echo "WARNING: Error to create cpp coverage dir"
         COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.cleaned ${PROJECT_BINARY_DIR}/${Coverage_NAME}_cpp.info || echo "WARNING: Not cpp report to copy"
@@ -181,15 +189,7 @@ function(ADD_CODE_COVERAGE)
         DEPENDS _run_tests_${PROJECT_NAME}
     )
 
-    # Ensure that the include component uses the correct path for symlinked source directories
-    get_filename_component(REAL_SOURCE_DIR ${PROJECT_SOURCE_DIR} REALPATH)
-
-    list(LENGTH Coverage_EXCLUDES Coverage_EXCLUDES_LENGTH)
-    if (${Coverage_EXCLUDES_LENGTH} EQUAL 0)
-      set(OMIT_FLAGS "")
-    else()
-      set(OMIT_FLAGS --omit ${Coverage_EXCLUDES})
-    endif()
+    set(OMIT_FLAGS --omit "*${REAL_SOURCE_DIR}/test/*" "*${REAL_SOURCE_DIR}/tests/*" ${Coverage_EXCLUDES})
 
     add_custom_command(
         OUTPUT ${PROJECT_BINARY_DIR}/${Coverage_NAME}_nosetests_python.xml
