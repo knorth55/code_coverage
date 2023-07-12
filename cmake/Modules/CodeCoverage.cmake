@@ -189,7 +189,9 @@ function(ADD_CODE_COVERAGE)
         DEPENDS _run_tests_${PROJECT_NAME}
     )
 
-    set(OMIT_FLAGS --omit "*${REAL_SOURCE_DIR}/test/*" "*${REAL_SOURCE_DIR}/tests/*" ${Coverage_EXCLUDES})
+    list(APPEND Coverage_EXCLUDES "${REAL_SOURCE_DIR}/test/*" "${REAL_SOURCE_DIR}/tests/*")
+    string(REPLACE ";" "," Coverage_EXCLUDES_STR "${Coverage_EXCLUDES}")
+    set(OMIT_FLAGS "--omit=\"${Coverage_EXCLUDES_STR}\"")
 
     add_custom_command(
         OUTPUT ${PROJECT_BINARY_DIR}/${Coverage_NAME}_nosetests_python.xml
