@@ -139,6 +139,60 @@ function(ADD_CODE_COVERAGE)
         set(COVERAGE_DIR $ENV{ROS_HOME})
     endif()
 
+    # Ensure that the include component uses the correct path for symlinked source directories
+    get_filename_component(REAL_SOURCE_DIR ${PROJECT_SOURCE_DIR} REALPATH)
+
+    # python omit and include flags
+    list(APPEND Coverage_EXCLUDES "${REAL_SOURCE_DIR}/test/*" "${REAL_SOURCE_DIR}/tests/*")
+    string(REPLACE ";" "," Coverage_EXCLUDES_STR "${Coverage_EXCLUDES}")
+    set(OMIT_FLAGS "--omit=\"${Coverage_EXCLUDES_STR}\"")
+    set(INCLUDE_FLAGS "--include=\"${REAL_SOURCE_DIR}/*\"")
+
+    # add target for non-test repo
+    if(NOT TARGET run_tests_${PROJECT_NAME})
+      add_custom_target(run_tests_${PROJECT_NAME})
+    endif()
+
+    if(NOT TARGET _run_tests_${PROJECT_NAME})
+      # create hidden meta target which depends on hidden test targets which depend on clean_test_results
+      add_custom_target(_run_tests_${PROJECT_NAME})
+      # run_tests depends on this hidden target hierarchy to clear test results before running all tests
+     add_dependencies(run_tests _run_tests_${PROJECT_NAME})
+    endif()
+
+    if(NOT DEFINED CATKIN_ENABLE_TESTING OR CATKIN_ENABLE_TESTING)
+      # create python base coverage directory
+      add_custom_target(
+        create_python_base_coverage_dir "${CMAKE_COMMAND}" "-E" "make_directory" ${PROJECT_BINARY_DIR}/python_base_coverage
+      )
+
+      # create python base coverage report
+      add_custom_target(run_tests_${PROJECT_NAME}_python_base_coverage_report
+        COMMAND rosrun code_coverage generate_base_coverage.py ${PROJECT_SOURCE_DIR} --output ${PROJECT_BINARY_DIR}/python_base_coverage
+        COMMAND ${PYTHON_COVERAGE_PATH} report ${INCLUDE_FLAGS} ${OMIT_FLAGS} || echo "WARNING: No python base report to output"
+        COMMAND ${PYTHON_COVERAGE_PATH} xml  -o ${Coverage_NAME}_base_python.xml ${INCLUDE_FLAGS} ${OMIT_FLAGS} || echo "WARNING: No base python xml to output"
+        COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/python_base_coverage/${Coverage_NAME}_base_python.xml ${PROJECT_BINARY_DIR}/ || echo "WARNING: No base python xml to copy"
+        DEPENDS create_python_base_coverage_dir
+        WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/python_base_coverage
+      )
+      # hidden test target which depends on building all tests and cleaning test results
+      add_custom_target(_run_tests_${PROJECT_NAME}_python_base_coverage_report
+        COMMAND rosrun code_coverage generate_base_coverage.py ${PROJECT_SOURCE_DIR} --output ${PROJECT_BINARY_DIR}/python_base_coverage
+        COMMAND ${PYTHON_COVERAGE_PATH} report ${INCLUDE_FLAGS} ${OMIT_FLAGS} || echo "WARNING: No python base report to output"
+        COMMAND ${PYTHON_COVERAGE_PATH} xml  -o ${Coverage_NAME}_base_python.xml ${INCLUDE_FLAGS} ${OMIT_FLAGS} || echo "WARNING: No base python xml to output"
+        COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/python_base_coverage/${Coverage_NAME}_base_python.xml ${PROJECT_BINARY_DIR}/ || echo "WARNING: No base python xml to copy"
+        DEPENDS create_python_base_coverage_dir
+        WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/python_base_coverage
+      )
+    else()
+      add_custom_target(run_tests_${PROJECT_NAME}_python_base_coverage_report
+          COMMAND "${CMAKE_COMMAND}" "-E" "echo" "Skipping python base coverage report target." )
+      add_custom_target(_run_tests_${PROJECT_NAME}_python_base_coverage_report
+          COMMAND "${CMAKE_COMMAND}" "-E" "echo" "Skipping python base coverage report target." )
+    endif()
+    add_dependencies(run_tests_${PROJECT_NAME} run_tests_${PROJECT_NAME}_python_base_coverage_report)
+    add_dependencies(_run_tests_${PROJECT_NAME} _run_tests_${PROJECT_NAME}_python_base_coverage_report)
+
     # Cleanup C++ counters
     add_custom_target(${Coverage_NAME}_cleanup_cpp
         # Cleanup lcov
@@ -160,9 +214,6 @@ function(ADD_CODE_COVERAGE)
     # Cleanup before we run tests
     add_dependencies(_run_tests_${PROJECT_NAME} ${Coverage_NAME}_cleanup_cpp)
     add_dependencies(_run_tests_${PROJECT_NAME} ${Coverage_NAME}_cleanup_py)
-
-    # Ensure that the include component uses the correct path for symlinked source directories
-    get_filename_component(REAL_SOURCE_DIR ${PROJECT_SOURCE_DIR} REALPATH)
 
     set(LCOV_REMOVES "'*${REAL_SOURCE_DIR}/test/*'" "'*${REAL_SOURCE_DIR}/tests/*'" "'*${REAL_SOURCE_DIR}/${PROJECT_NAME}/test/*'" "'*${REAL_SOURCE_DIR}/${PROJECT_NAME}/tests/*'" ${Coverage_EXCLUDES})
 
@@ -189,12 +240,6 @@ function(ADD_CODE_COVERAGE)
         DEPENDS _run_tests_${PROJECT_NAME}
     )
 
-    list(APPEND Coverage_EXCLUDES "${REAL_SOURCE_DIR}/test/*" "${REAL_SOURCE_DIR}/tests/*")
-    string(REPLACE ";" "," Coverage_EXCLUDES_STR "${Coverage_EXCLUDES}")
-    set(OMIT_FLAGS "--omit=\"${Coverage_EXCLUDES_STR}\"")
-    set(INCLUDE_FLAGS "--include=\"${REAL_SOURCE_DIR}/*\"")
-
-    # Create python nosetests coverage report
     add_custom_command(
         OUTPUT ${PROJECT_BINARY_DIR}/${Coverage_NAME}_nosetests_python.xml
         COMMAND ${PYTHON_COVERAGE_PATH} report ${INCLUDE_FLAGS} ${OMIT_FLAGS} || echo "WARNING: No python nosetests report to output"
