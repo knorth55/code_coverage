@@ -255,7 +255,10 @@ function(ADD_CODE_COVERAGE)
     add_dependencies(_run_tests_${PROJECT_NAME} ${Coverage_NAME}_cleanup_cpp)
     add_dependencies(_run_tests_${PROJECT_NAME} ${Coverage_NAME}_cleanup_py)
 
-    set(LCOV_REMOVES "'*${REAL_SOURCE_DIR}/test/*'" "'*${REAL_SOURCE_DIR}/tests/*'" "'*${REAL_SOURCE_DIR}/${PROJECT_NAME}/test/*'" "'*${REAL_SOURCE_DIR}/${PROJECT_NAME}/tests/*'" ${Coverage_EXCLUDES})
+    set(LCOV_REMOVES ${Coverage_EXCLUDES})
+    list(APPEND LCOV_REMOVES "'*${REAL_SOURCE_DIR}/test/*'" "'*${REAL_SOURCE_DIR}/tests/*'"
+                             "'*${REAL_SOURCE_DIR}/include/*'" "'*${REAL_SOURCE_DIR}/src/**.h'"
+                             "'*${REAL_SOURCE_DIR}/src/**.hpp'")
 
     # Create C++ coverage report
     add_custom_command(
