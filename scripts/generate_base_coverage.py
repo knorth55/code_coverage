@@ -18,6 +18,22 @@ def main():
     parser.add_argument('--output', '-o', type=str, default='.')
     args = parser.parse_args()
 
+    # python .coverage file is json file with comment at the top.
+    # the json structure is like below.
+    #
+    # # comment at the top
+    # !coverage.py: This is a private format, don't read it directly!
+    # {
+    #   "lines": {
+    #     # filepath: [list of hitting lines]
+    #     "/home/gitai/gitai/catkin_ws/src/sample_package/scripts/hoge.py": [1, 3, 4, 5],
+    #     "/home/gitai/gitai/catkin_ws/src/sample_package/scripts/fuga.py": [],
+    #     ...
+    #   }
+    # }
+    #
+    # If you want to make .coverage file with no hitting lines,
+    # you need to register empty list as the list of hitting lines.
     python_filepaths = list_python_filepaths(os.path.abspath(args.base_dir))
     coverage_lines = {}
     for python_filepath in python_filepaths:
