@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 
+# generate_base_coverage.py
+# this script lists up all python files in repo and generate base coverage report.
+# the base coverage report covers all python files, including non-tested files.
+# with the base coverage report, we can calculate coverage with non-tested files, too.
+
 import argparse
 import glob
 import json

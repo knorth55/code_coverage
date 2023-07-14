@@ -167,6 +167,8 @@ function(ADD_CODE_COVERAGE)
       )
 
       # create python base coverage report
+      # generate_base_coverage.py list up python files in the repo and generate base coverage report
+      # base coverage report is needed to cover all python files, including non-tested files.
       add_custom_target(run_tests_${PROJECT_NAME}_python_base_coverage_report
         COMMAND rosrun code_coverage generate_base_coverage.py ${PROJECT_SOURCE_DIR} --output ${PROJECT_BINARY_DIR}/python_base_coverage
         COMMAND ${PYTHON_COVERAGE_PATH} report ${INCLUDE_FLAGS} ${OMIT_FLAGS} || echo "WARNING: No python base report to output"
