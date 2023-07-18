@@ -8,14 +8,20 @@
 import argparse
 import glob
 import json
-import magic
 import os
+
+import magic
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('base_dir', type=str)
     parser.add_argument('--output', '-o', type=str, default='.')
+    parser.add_argument('--include-python-directories',
+                        '-i',
+                        type=str,
+                        nargs='*',
+                        default=['bin', 'node_scripts', 'src', 'scripts'])
     args = parser.parse_args()
 
     # python .coverage file is json file with comment at the top.
@@ -34,7 +40,8 @@ def main():
     #
     # If you want to make .coverage file with no hitting lines,
     # you need to register empty list as the list of hitting lines.
-    python_filepaths = list_python_filepaths(os.path.abspath(args.base_dir))
+    python_filepaths = list_python_filepaths(os.path.abspath(args.base_dir),
+                                             args.include_python_directories)
     coverage_lines = {}
     for python_filepath in python_filepaths:
         coverage_lines[python_filepath] = []
@@ -46,16 +53,11 @@ def main():
         coverage_f.write(coverage_txt)
 
 
-def list_python_filepaths(base_dir):
-    python_directories = [
-        'bin',
-        'node_scripts',
-        'src',
-        'scripts',
-    ]
+def list_python_filepaths(base_dir, python_directories):
     python_filepaths = []
     for python_dir in python_directories:
-        for filepath in glob.glob(os.path.join(base_dir, python_dir, '**'), recursive=True):
+        for filepath in glob.glob(os.path.join(base_dir, python_dir, '**'),
+                                  recursive=True):
             if os.path.isfile(filepath):
                 fileext = os.path.splitext(filepath)[1]
                 if (fileext == '.py' or

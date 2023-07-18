@@ -126,7 +126,7 @@ function(ADD_CODE_COVERAGE)
 
     set(options NONE)
     set(oneValueArgs NAME)
-    set(multiValueArgs DEPENDENCIES;EXCLUDES)
+    set(multiValueArgs DEPENDENCIES;EXCLUDES;INCLUDE_PYTHON_DIRECTORIES)
     cmake_parse_arguments(Coverage "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     if(NOT LCOV_PATH)
@@ -171,6 +171,13 @@ function(ADD_CODE_COVERAGE)
     endif()
 
     if(NOT DEFINED CATKIN_ENABLE_TESTING OR CATKIN_ENABLE_TESTING)
+      # set include python flags
+      set(INCLUDE_PYTHON_FLAGS "")
+      if(NOT "${Coverage_INCLUDE_PYTHON_DIRECTORIES}" STREQUAL "")
+        list(APPEND INCLUDE_PYTHON_FLAGS "--include-python-directories")
+        list(APPEND INCLUDE_PYTHON_FLAGS ${Coverage_INCLUDE_PYTHON_DIRECTORIES})
+      endif()
+
       # create python base coverage directory
       add_custom_target(
         create_python_base_coverage_dir "${CMAKE_COMMAND}" "-E" "make_directory" ${PROJECT_BINARY_DIR}/python_base_coverage
@@ -211,7 +218,7 @@ function(ADD_CODE_COVERAGE)
       # base coverage report is needed to cover all python files, including non-tested files.
       add_custom_target(run_tests_${PROJECT_NAME}_python_base_coverage_report
         COMMAND ${_code_coverage_SOURCE_DIR}/scripts/generate_base_coverage.py ${PROJECT_SOURCE_DIR}
-                --output ${PROJECT_BINARY_DIR}/python_base_coverage
+                --output ${PROJECT_BINARY_DIR}/python_base_coverage ${INCLUDE_PYTHON_FLAGS}
         COMMAND ${PYTHON_COVERAGE_PATH} report ${INCLUDE_FLAGS} ${OMIT_FLAGS} || echo "WARNING: No python base report to output"
         COMMAND ${PYTHON_COVERAGE_PATH} xml  -o ${Coverage_NAME}_base_python.xml ${INCLUDE_FLAGS} ${OMIT_FLAGS} || echo "WARNING: No base python xml to output"
         COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/python_base_coverage/${Coverage_NAME}_base_python.xml ${PROJECT_BINARY_DIR}/ || echo "WARNING: No base python xml to copy"
@@ -221,7 +228,7 @@ function(ADD_CODE_COVERAGE)
       # hidden test target which depends on building all tests and cleaning test results
       add_custom_target(_run_tests_${PROJECT_NAME}_python_base_coverage_report
         COMMAND ${_code_coverage_SOURCE_DIR}/scripts/generate_base_coverage.py ${PROJECT_SOURCE_DIR}
-                --output ${PROJECT_BINARY_DIR}/python_base_coverage
+                --output ${PROJECT_BINARY_DIR}/python_base_coverage ${INCLUDE_PYTHON_FLAGS}
         COMMAND ${PYTHON_COVERAGE_PATH} report ${INCLUDE_FLAGS} ${OMIT_FLAGS} || echo "WARNING: No python base report to output"
         COMMAND ${PYTHON_COVERAGE_PATH} xml  -o ${Coverage_NAME}_base_python.xml ${INCLUDE_FLAGS} ${OMIT_FLAGS} || echo "WARNING: No base python xml to output"
         COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/python_base_coverage/${Coverage_NAME}_base_python.xml ${PROJECT_BINARY_DIR}/ || echo "WARNING: No base python xml to copy"
