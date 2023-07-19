@@ -150,9 +150,7 @@ function(ADD_CODE_COVERAGE)
 
     # cpp lcov remove flags
     set(LCOV_REMOVES ${Coverage_EXCLUDES})
-    list(APPEND LCOV_REMOVES "'*${REAL_SOURCE_DIR}/test/*'" "'*${REAL_SOURCE_DIR}/tests/*'"
-                             "'*${REAL_SOURCE_DIR}/include/*'" "'*${REAL_SOURCE_DIR}/src/**.h'"
-                             "'*${REAL_SOURCE_DIR}/src/**.hpp'")
+    list(APPEND LCOV_REMOVES "'*${REAL_SOURCE_DIR}/test/*'" "'*${REAL_SOURCE_DIR}/tests/*'")
 
     # add target for non-test repo
     # we need to set run_tests_${PROJECT_NAME} and _run_tests_${PROJECT_NAME} for repo with no-test
