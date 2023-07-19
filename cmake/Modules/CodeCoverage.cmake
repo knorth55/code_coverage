@@ -149,6 +149,12 @@ function(ADD_CODE_COVERAGE)
     set(INCLUDE_FLAGS "--include=\"${REAL_SOURCE_DIR}/*\"")
 
     # add target for non-test repo
+    # we need to set run_tests_${PROJECT_NAME} and _run_tests_${PROJECT_NAME} for repo with no-test
+    # otherwise test fails.
+    # catkin tools executed either runrun_tests_${PROJECT_NAME} or _run_tests_${PROJECT_NAME}.
+    # run_tests_${PROJECT_NAME} and _run_tests_${PROJECT_NAME} does not run simaltaneously. 
+    # _run_tests_${PROJECT_NAME} is for cleaning test result and run tests.
+    # https://github.com/ros/catkin/commit/f931db5c8c14475a9d74ffc65b9dbbe45c98d11d
     if(NOT TARGET run_tests_${PROJECT_NAME})
       add_custom_target(run_tests_${PROJECT_NAME})
     endif()
