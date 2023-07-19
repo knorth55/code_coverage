@@ -166,11 +166,21 @@ function(ADD_CODE_COVERAGE)
         create_python_base_coverage_dir "${CMAKE_COMMAND}" "-E" "make_directory" ${PROJECT_BINARY_DIR}/python_base_coverage
       )
 
+      # find code_coverage path
+      if(code_coverage_SOURCE_DIR)
+        set(_code_coverage_SOURCE_DIR ${code_coverage_SOURCE_DIR})
+      elseif(code_coverage_SOURCE_PREFIX)
+        set(_code_coverage_SOURCE_DIR ${code_coverage_SOURCE_PREFIX})
+      else(code_coverage_SOURCE_PREFIX)
+        set(_code_coverage_SOURCE_DIR ${code_coverage_PREFIX}/share/code_coverage)
+      endif()
+
       # create python base coverage report
       # generate_base_coverage.py list up python files in the repo and generate base coverage report
       # base coverage report is needed to cover all python files, including non-tested files.
       add_custom_target(run_tests_${PROJECT_NAME}_python_base_coverage_report
-        COMMAND rosrun code_coverage generate_base_coverage.py ${PROJECT_SOURCE_DIR} --output ${PROJECT_BINARY_DIR}/python_base_coverage
+        COMMAND ${_code_coverage_SOURCE_DIR}/scripts/generate_base_coverage.py ${PROJECT_SOURCE_DIR}
+                --output ${PROJECT_BINARY_DIR}/python_base_coverage
         COMMAND ${PYTHON_COVERAGE_PATH} report ${INCLUDE_FLAGS} ${OMIT_FLAGS} || echo "WARNING: No python base report to output"
         COMMAND ${PYTHON_COVERAGE_PATH} xml  -o ${Coverage_NAME}_base_python.xml ${INCLUDE_FLAGS} ${OMIT_FLAGS} || echo "WARNING: No base python xml to output"
         COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/python_base_coverage/${Coverage_NAME}_base_python.xml ${PROJECT_BINARY_DIR}/ || echo "WARNING: No base python xml to copy"
@@ -179,7 +189,8 @@ function(ADD_CODE_COVERAGE)
       )
       # hidden test target which depends on building all tests and cleaning test results
       add_custom_target(_run_tests_${PROJECT_NAME}_python_base_coverage_report
-        COMMAND rosrun code_coverage generate_base_coverage.py ${PROJECT_SOURCE_DIR} --output ${PROJECT_BINARY_DIR}/python_base_coverage
+        COMMAND ${_code_coverage_SOURCE_DIR}/scripts/generate_base_coverage.py ${PROJECT_SOURCE_DIR}
+                --output ${PROJECT_BINARY_DIR}/python_base_coverage
         COMMAND ${PYTHON_COVERAGE_PATH} report ${INCLUDE_FLAGS} ${OMIT_FLAGS} || echo "WARNING: No python base report to output"
         COMMAND ${PYTHON_COVERAGE_PATH} xml  -o ${Coverage_NAME}_base_python.xml ${INCLUDE_FLAGS} ${OMIT_FLAGS} || echo "WARNING: No base python xml to output"
         COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/python_base_coverage/${Coverage_NAME}_base_python.xml ${PROJECT_BINARY_DIR}/ || echo "WARNING: No base python xml to copy"
