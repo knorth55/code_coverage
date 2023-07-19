@@ -185,6 +185,7 @@ function(ADD_CODE_COVERAGE)
         COMMAND ${PYTHON_COVERAGE_PATH} xml  -o ${Coverage_NAME}_base_python.xml ${INCLUDE_FLAGS} ${OMIT_FLAGS} || echo "WARNING: No base python xml to output"
         COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/python_base_coverage/${Coverage_NAME}_base_python.xml ${PROJECT_BINARY_DIR}/ || echo "WARNING: No base python xml to copy"
         DEPENDS create_python_base_coverage_dir
+                ${_code_coverage_SOURCE_DIR}/scripts/generate_base_coverage.py
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/python_base_coverage
       )
       # hidden test target which depends on building all tests and cleaning test results
@@ -195,6 +196,7 @@ function(ADD_CODE_COVERAGE)
         COMMAND ${PYTHON_COVERAGE_PATH} xml  -o ${Coverage_NAME}_base_python.xml ${INCLUDE_FLAGS} ${OMIT_FLAGS} || echo "WARNING: No base python xml to output"
         COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/python_base_coverage/${Coverage_NAME}_base_python.xml ${PROJECT_BINARY_DIR}/ || echo "WARNING: No base python xml to copy"
         DEPENDS create_python_base_coverage_dir
+                ${_code_coverage_SOURCE_DIR}/scripts/generate_base_coverage.py
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/python_base_coverage
       )
     else()
