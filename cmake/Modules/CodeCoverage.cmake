@@ -163,7 +163,7 @@ function(ADD_CODE_COVERAGE)
       # create hidden meta target which depends on hidden test targets which depend on clean_test_results
       add_custom_target(_run_tests_${PROJECT_NAME})
       # run_tests depends on this hidden target hierarchy to clear test results before running all tests
-     add_dependencies(run_tests _run_tests_${PROJECT_NAME})
+      add_dependencies(run_tests _run_tests_${PROJECT_NAME})
     endif()
 
     if(NOT DEFINED CATKIN_ENABLE_TESTING OR CATKIN_ENABLE_TESTING)
