@@ -230,24 +230,35 @@ function(ADD_CODE_COVERAGE)
       )
 
       # create cpp base coverage report
+      # lcov -c -i -d in ${PROJECT_BINARY_DIR} list up cpp and header files built with coverage flags and generate base coverage report
+      # base coverage report is need to cover all cpp and header files, including non-tested files.
       add_custom_target(run_tests_${PROJECT_NAME}_cpp_base_coverage_report
         # Cleanup lcov
         COMMAND ${LCOV_PATH} --directory . --zerocounters
         # Create baseline to make sure untouched files show up in the report
-        COMMAND ${LCOV_PATH} -c -i -d . -o ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.total || echo "WARNING: No base cpp report to output"
+        COMMAND ${LCOV_PATH} -c -i -d . -o ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.total
+                || echo "WARNING: No base cpp report to output"
         COMMAND ${LCOV_PATH} --remove ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.total ${LCOV_REMOVES}
-                --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.removed ||  echo "WARNING: No base cpp report to output"
+                             --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.removed
+                ||  echo "WARNING: No base cpp report to output"
         COMMAND ${LCOV_PATH} --extract ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.removed "'*${REAL_SOURCE_DIR}*'"
-                --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.cleaned || echo "WARNING: No base cpp report to output"
-        COMMAND ${CMAKE_COMMAND} -E remove ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.total || echo "WARNING: No base cpp report to remove"
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/cpp_base_coverage || echo "WARNING: Error to create base cpp coverage dir"
-        COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.cleaned ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info
+                             --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.cleaned
+                || echo "WARNING: No base cpp report to output"
+        COMMAND ${CMAKE_COMMAND} -E remove ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.total
+                || echo "WARNING: No base cpp report to remove"
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/cpp_base_coverage
+                || echo "WARNING: Error to create base cpp coverage dir"
+        COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.cleaned
+                                         ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info
                 || echo "WARNING: No base cpp report to copy"
-        COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info ${PROJECT_BINARY_DIR}/cpp_base_coverage/${Coverage_NAME}_base_cpp.info
+        COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info
+                                         ${PROJECT_BINARY_DIR}/cpp_base_coverage/${Coverage_NAME}_base_cpp.info
                 || echo "WARNING: No base cpp report to copy"
-        COMMAND ${CMAKE_COMMAND} -E rename ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.removed ${PROJECT_BINARY_DIR}/cpp_base_coverage/${Coverage_NAME}_base_cpp.info.removed
+        COMMAND ${CMAKE_COMMAND} -E rename ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.removed
+                                           ${PROJECT_BINARY_DIR}/cpp_base_coverage/${Coverage_NAME}_base_cpp.info.removed
                 || echo "WARNING: No base cpp report to move"
-        COMMAND ${CMAKE_COMMAND} -E rename ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.cleaned ${PROJECT_BINARY_DIR}/cpp_base_coverage/${Coverage_NAME}_base_cpp.info.cleaned
+        COMMAND ${CMAKE_COMMAND} -E rename ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.cleaned
+                                           ${PROJECT_BINARY_DIR}/cpp_base_coverage/${Coverage_NAME}_base_cpp.info.cleaned
                 || echo "WARNING: No base cpp report to move"
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
       )
@@ -256,24 +267,34 @@ function(ADD_CODE_COVERAGE)
         # Cleanup lcov
         COMMAND ${LCOV_PATH} --directory . --zerocounters
         # Create baseline to make sure untouched files show up in the report
-        COMMAND ${LCOV_PATH} -c -i -d . -o ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.total || echo "WARNING: No base cpp report to output"
+        COMMAND ${LCOV_PATH} -c -i -d . -o ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.total
+                || echo "WARNING: No base cpp report to output"
         COMMAND ${LCOV_PATH} --remove ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.total ${LCOV_REMOVES}
-                --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.removed ||  echo "WARNING: No base cpp report to output"
+                             --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.removed
+                ||  echo "WARNING: No base cpp report to output"
         COMMAND ${LCOV_PATH} --extract ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.removed "'*${REAL_SOURCE_DIR}*'"
-                --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.cleaned || echo "WARNING: No base cpp report to output"
-        COMMAND ${CMAKE_COMMAND} -E remove ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.total || echo "WARNING: No base cpp report to remove"
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/cpp_base_coverage || echo "WARNING: Error to create base cpp coverage dir"
-        COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.cleaned ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info
+                             --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.cleaned
+                || echo "WARNING: No base cpp report to output"
+        COMMAND ${CMAKE_COMMAND} -E remove ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.total
+                || echo "WARNING: No base cpp report to remove"
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/cpp_base_coverage
+                || echo "WARNING: Error to create base cpp coverage dir"
+        COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.cleaned
+                                         ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info
                 || echo "WARNING: No base cpp report to copy"
-        COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info ${PROJECT_BINARY_DIR}/cpp_base_coverage/${Coverage_NAME}_base_cpp.info
+        COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info
+                                         ${PROJECT_BINARY_DIR}/cpp_base_coverage/${Coverage_NAME}_base_cpp.info
                 || echo "WARNING: No base cpp report to copy"
-        COMMAND ${CMAKE_COMMAND} -E rename ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.removed ${PROJECT_BINARY_DIR}/cpp_base_coverage/${Coverage_NAME}_base_cpp.info.removed
+        COMMAND ${CMAKE_COMMAND} -E rename ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.removed
+                                           ${PROJECT_BINARY_DIR}/cpp_base_coverage/${Coverage_NAME}_base_cpp.info.removed
                 || echo "WARNING: No base cpp report to move"
-        COMMAND ${CMAKE_COMMAND} -E rename ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.cleaned ${PROJECT_BINARY_DIR}/cpp_base_coverage/${Coverage_NAME}_base_cpp.info.cleaned
+        COMMAND ${CMAKE_COMMAND} -E rename ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.cleaned
+                                           ${PROJECT_BINARY_DIR}/cpp_base_coverage/${Coverage_NAME}_base_cpp.info.cleaned
                 || echo "WARNING: No base cpp report to move"
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
       )
     else()
+      # dummy targets for the case test and coverage are not enabled
       add_custom_target(run_tests_${PROJECT_NAME}_python_base_coverage_report
           COMMAND "${CMAKE_COMMAND}" "-E" "echo" "Skipping python base coverage report target." )
       add_custom_target(_run_tests_${PROJECT_NAME}_python_base_coverage_report
@@ -283,8 +304,14 @@ function(ADD_CODE_COVERAGE)
       add_custom_target(_run_tests_${PROJECT_NAME}_cpp_base_coverage_report
           COMMAND "${CMAKE_COMMAND}" "-E" "echo" "Skipping cpp base coverage report target." )
     endif()
-    add_dependencies(run_tests_${PROJECT_NAME} run_tests_${PROJECT_NAME}_python_base_coverage_report run_tests_${PROJECT_NAME}_cpp_base_coverage_report)
-    add_dependencies(_run_tests_${PROJECT_NAME} _run_tests_${PROJECT_NAME}_python_base_coverage_report _run_tests_${PROJECT_NAME}_cpp_base_coverage_report)
+
+    # add base coverage report generation as run_tests_${PROJECT_NAME} and _run_tests_${PROJECT_NAME} dependency
+    add_dependencies(run_tests_${PROJECT_NAME}
+                     run_tests_${PROJECT_NAME}_python_base_coverage_report
+                     run_tests_${PROJECT_NAME}_cpp_base_coverage_report)
+    add_dependencies(_run_tests_${PROJECT_NAME}
+                     _run_tests_${PROJECT_NAME}_python_base_coverage_report
+                     _run_tests_${PROJECT_NAME}_cpp_base_coverage_report)
 
     # Cleanup C++ counters
     add_custom_target(${Coverage_NAME}_cleanup_cpp
