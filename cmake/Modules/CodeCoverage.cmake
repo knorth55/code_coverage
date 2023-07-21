@@ -171,13 +171,6 @@ function(ADD_CODE_COVERAGE)
     endif()
 
     if(NOT DEFINED CATKIN_ENABLE_TESTING OR CATKIN_ENABLE_TESTING)
-      # set include python flags
-      set(INCLUDE_PYTHON_FLAGS "")
-      if(NOT "${Coverage_INCLUDE_PYTHON_DIRECTORIES}" STREQUAL "")
-        list(APPEND INCLUDE_PYTHON_FLAGS "--include-python-directories")
-        list(APPEND INCLUDE_PYTHON_FLAGS ${Coverage_INCLUDE_PYTHON_DIRECTORIES})
-      endif()
-
       # create python base coverage directory
       add_custom_target(
         create_python_base_coverage_dir "${CMAKE_COMMAND}" "-E" "make_directory" ${PROJECT_BINARY_DIR}/python_base_coverage
@@ -192,19 +185,29 @@ function(ADD_CODE_COVERAGE)
         set(_code_coverage_SOURCE_DIR ${code_coverage_PREFIX}/share/code_coverage)
       endif()
 
+      # list up python source directory candidates
+      if("${Coverage_INCLUDE_PYTHON_DIRECTORIES}" STREQUAL "")
+        set(PROJECT_PYTHON_SOURCE_DIR_CANDIDATES bin node_scripts scripts src)
+      else()
+        set(PROJECT_PYTHON_SOURCE_DIR_CANDIDATES ${Coverage_INCLUDE_PYTHON_DIRECTORIES})
+      endif()
+
       # check and create python source directories lists
-      set(PROJECT_PYTHON_SOURCE_DIR_CANDIDATES
-        ${PROJECT_SOURCE_DIR}/bin
-        ${PROJECT_SOURCE_DIR}/node_scripts
-        ${PROJECT_SOURCE_DIR}/scripts
-        ${PROJECT_SOURCE_DIR}/src
-      )
       set(PROJECT_PYTHON_SOURCE_DIRS "")
+      set(PROJECT_PYTHON_SOURCE_DIRS_RELATIVE "")
       foreach(PROJECT_PYTHON_SOURCE_DIR_CANDIDATE ${PROJECT_PYTHON_SOURCE_DIR_CANDIDATES})
-        if (EXISTS ${PROJECT_PYTHON_SOURCE_DIR_CANDIDATE})
-          list(APPEND PROJECT_PYTHON_SOURCE_DIRS ${PROJECT_PYTHON_SOURCE_DIR_CANDIDATE})
+        if (EXISTS ${PROJECT_SOURCE_DIR}/${PROJECT_PYTHON_SOURCE_DIR_CANDIDATE})
+          list(APPEND PROJECT_PYTHON_SOURCE_DIRS ${PROJECT_SOURCE_DIR}/${PROJECT_PYTHON_SOURCE_DIR_CANDIDATE})
+          list(APPEND PROJECT_PYTHON_SOURCE_DIRS_RELATIVE ${PROJECT_PYTHON_SOURCE_DIR_CANDIDATE})
         endif()
       endforeach()
+
+      # set include python flags
+      set(INCLUDE_PYTHON_FLAGS "")
+      if (NOT "${PROJECT_PYTHON_SOURCE_DIRS_RELATIVE}" STREQUAL "")
+        list(APPEND INCLUDE_PYTHON_FLAGS "--include-python-directories")
+        list(APPEND INCLUDE_PYTHON_FLAGS ${PROJECT_PYTHON_SOURCE_DIRS_RELATIVE})
+      endif()
 
       # create depends list
       set(PYTHON_BASE_COVERAGE_REPORT_DEPENDS
