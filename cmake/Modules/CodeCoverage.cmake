@@ -126,7 +126,7 @@ function(ADD_CODE_COVERAGE)
 
     set(options NONE)
     set(oneValueArgs NAME)
-    set(multiValueArgs DEPENDENCIES;EXCLUDES)
+    set(multiValueArgs DEPENDENCIES;EXCLUDES;INCLUDE_PYTHON_DIRECTORIES)
     cmake_parse_arguments(Coverage "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     if(NOT LCOV_PATH)
@@ -185,19 +185,29 @@ function(ADD_CODE_COVERAGE)
         set(_code_coverage_SOURCE_DIR ${code_coverage_PREFIX}/share/code_coverage)
       endif()
 
+      # list up python source directory candidates
+      if("${Coverage_INCLUDE_PYTHON_DIRECTORIES}" STREQUAL "")
+        set(PROJECT_PYTHON_SOURCE_DIR_CANDIDATES bin node_scripts scripts src)
+      else()
+        set(PROJECT_PYTHON_SOURCE_DIR_CANDIDATES ${Coverage_INCLUDE_PYTHON_DIRECTORIES})
+      endif()
+
       # check and create python source directories lists
-      set(PROJECT_PYTHON_SOURCE_DIR_CANDIDATES
-        ${PROJECT_SOURCE_DIR}/bin
-        ${PROJECT_SOURCE_DIR}/node_scripts
-        ${PROJECT_SOURCE_DIR}/scripts
-        ${PROJECT_SOURCE_DIR}/src
-      )
       set(PROJECT_PYTHON_SOURCE_DIRS "")
+      set(PROJECT_PYTHON_SOURCE_DIRS_RELATIVE "")
       foreach(PROJECT_PYTHON_SOURCE_DIR_CANDIDATE ${PROJECT_PYTHON_SOURCE_DIR_CANDIDATES})
-        if (EXISTS ${PROJECT_PYTHON_SOURCE_DIR_CANDIDATE})
-          list(APPEND PROJECT_PYTHON_SOURCE_DIRS ${PROJECT_PYTHON_SOURCE_DIR_CANDIDATE})
+        if (EXISTS ${PROJECT_SOURCE_DIR}/${PROJECT_PYTHON_SOURCE_DIR_CANDIDATE})
+          list(APPEND PROJECT_PYTHON_SOURCE_DIRS ${PROJECT_SOURCE_DIR}/${PROJECT_PYTHON_SOURCE_DIR_CANDIDATE})
+          list(APPEND PROJECT_PYTHON_SOURCE_DIRS_RELATIVE ${PROJECT_PYTHON_SOURCE_DIR_CANDIDATE})
         endif()
       endforeach()
+
+      # set include python flags
+      set(INCLUDE_PYTHON_FLAGS "")
+      if (NOT "${PROJECT_PYTHON_SOURCE_DIRS_RELATIVE}" STREQUAL "")
+        list(APPEND INCLUDE_PYTHON_FLAGS "--include-python-directories")
+        list(APPEND INCLUDE_PYTHON_FLAGS ${PROJECT_PYTHON_SOURCE_DIRS_RELATIVE})
+      endif()
 
       # create depends list
       set(PYTHON_BASE_COVERAGE_REPORT_DEPENDS
@@ -211,7 +221,7 @@ function(ADD_CODE_COVERAGE)
       # base coverage report is needed to cover all python files, including non-tested files.
       add_custom_target(run_tests_${PROJECT_NAME}_python_base_coverage_report
         COMMAND ${_code_coverage_SOURCE_DIR}/scripts/generate_base_coverage.py ${PROJECT_SOURCE_DIR}
-                --output ${PROJECT_BINARY_DIR}/python_base_coverage
+                --output ${PROJECT_BINARY_DIR}/python_base_coverage ${INCLUDE_PYTHON_FLAGS}
         COMMAND ${PYTHON_COVERAGE_PATH} report ${INCLUDE_FLAGS} ${OMIT_FLAGS} || echo "WARNING: No python base report to output"
         COMMAND ${PYTHON_COVERAGE_PATH} xml  -o ${Coverage_NAME}_base_python.xml ${INCLUDE_FLAGS} ${OMIT_FLAGS} || echo "WARNING: No base python xml to output"
         COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/python_base_coverage/${Coverage_NAME}_base_python.xml ${PROJECT_BINARY_DIR}/ || echo "WARNING: No base python xml to copy"
@@ -221,7 +231,7 @@ function(ADD_CODE_COVERAGE)
       # hidden test target which depends on building all tests and cleaning test results
       add_custom_target(_run_tests_${PROJECT_NAME}_python_base_coverage_report
         COMMAND ${_code_coverage_SOURCE_DIR}/scripts/generate_base_coverage.py ${PROJECT_SOURCE_DIR}
-                --output ${PROJECT_BINARY_DIR}/python_base_coverage
+                --output ${PROJECT_BINARY_DIR}/python_base_coverage ${INCLUDE_PYTHON_FLAGS}
         COMMAND ${PYTHON_COVERAGE_PATH} report ${INCLUDE_FLAGS} ${OMIT_FLAGS} || echo "WARNING: No python base report to output"
         COMMAND ${PYTHON_COVERAGE_PATH} xml  -o ${Coverage_NAME}_base_python.xml ${INCLUDE_FLAGS} ${OMIT_FLAGS} || echo "WARNING: No base python xml to output"
         COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/python_base_coverage/${Coverage_NAME}_base_python.xml ${PROJECT_BINARY_DIR}/ || echo "WARNING: No base python xml to copy"
