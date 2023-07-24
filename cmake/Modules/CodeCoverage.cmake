@@ -294,9 +294,9 @@ function(ADD_CODE_COVERAGE)
     add_custom_command(
         OUTPUT ${PROJECT_BINARY_DIR}/${Coverage_NAME}_pytests_python.xml
         COMMAND ${PYTHON_COVERAGE_PATH} combine || echo "WARNING: No python pytests coverage to combine"
-        COMMAND ${PYTHON_COVERAGE_PATH} report --include "*${REAL_SOURCE_DIR}*" ${OMIT_FLAGS} || echo "WARNING: No python pytests report to output"
-        COMMAND ${PYTHON_COVERAGE_PATH} xml  -o ${Coverage_NAME}_pytests_python.xml --include "*${REAL_SOURCE_DIR}*" ${OMIT_FLAGS} || echo "WARNING: No python pytests xml to output"
-        COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/python_pytests_coverage/${Coverage_NAME}_pytests_python.xml ${PROJECT_BINARY_DIR}/${Coverage_NAME}_pytests_python.xml || echo "WARNING: No python xml to copy"
+        COMMAND ${PYTHON_COVERAGE_PATH} report ${INCLUDE_FLAGS} ${OMIT_FLAGS} || echo "WARNING: No python pytests report to output"
+        COMMAND ${PYTHON_COVERAGE_PATH} xml  -o ${Coverage_NAME}_pytests_python.xml ${INCLUDE_FLAGS} ${OMIT_FLAGS} || echo "WARNING: No python pytests xml to output"
+        COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/python_pytests_coverage/${Coverage_NAME}_pytests_python.xml ${PROJECT_BINARY_DIR}/${Coverage_NAME}_pytests_python.xml || echo "WARNING: No python pytests xml to copy"
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/python_pytests_coverage
         DEPENDS _run_tests_${PROJECT_NAME}
     )
