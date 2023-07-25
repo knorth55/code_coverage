@@ -390,12 +390,16 @@ function(ADD_CODE_COVERAGE)
 
     add_custom_command(
         OUTPUT ${PROJECT_BINARY_DIR}/${Coverage_NAME}_nosetests_python.xml
+               ${PROJECT_BINARY_DIR}/python_nosetests_coverage/${Coverage_NAME}_nosetests_python.xml
         COMMAND ${PYTHON_COVERAGE_PATH} report ${INCLUDE_FLAGS} ${OMIT_FLAGS}
                 || echo "WARNING: No python nosetests report to output"
         COMMAND ${PYTHON_COVERAGE_PATH} xml  -o ${Coverage_NAME}_nosetests_python.xml ${INCLUDE_FLAGS} ${OMIT_FLAGS}
                 || echo "WARNING: No python nosetests xml to output"
         COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/python_nosetests_coverage/
                 || echo "WARNING: Error to create python nosetests coverage dir"
+        COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/${Coverage_NAME}_nosetests_python.xml
+                                         ${PROJECT_BINARY_DIR}/python_nosetests_coverage/${Coverage_NAME}_nosetests_python.xml
+                || echo "WARNING: No python nosetests xml to copy"
         COMMAND mv ${PROJECT_BINARY_DIR}/.coverage* ${PROJECT_BINARY_DIR}/python_nosetests_coverage/
                 || echo "WARNING: No python nosetests report to move"
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
