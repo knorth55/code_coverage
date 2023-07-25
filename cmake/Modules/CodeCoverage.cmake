@@ -222,9 +222,13 @@ function(ADD_CODE_COVERAGE)
       add_custom_target(run_tests_${PROJECT_NAME}_python_base_coverage_report
         COMMAND ${_code_coverage_SOURCE_DIR}/scripts/generate_base_coverage.py ${PROJECT_SOURCE_DIR}
                 --output ${PROJECT_BINARY_DIR}/python_base_coverage ${INCLUDE_PYTHON_FLAGS}
-        COMMAND ${PYTHON_COVERAGE_PATH} report ${INCLUDE_FLAGS} ${OMIT_FLAGS} || echo "WARNING: No python base report to output"
-        COMMAND ${PYTHON_COVERAGE_PATH} xml  -o ${Coverage_NAME}_base_python.xml ${INCLUDE_FLAGS} ${OMIT_FLAGS} || echo "WARNING: No base python xml to output"
-        COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/python_base_coverage/${Coverage_NAME}_base_python.xml ${PROJECT_BINARY_DIR}/ || echo "WARNING: No base python xml to copy"
+        COMMAND ${PYTHON_COVERAGE_PATH} report ${INCLUDE_FLAGS} ${OMIT_FLAGS}
+                || echo "WARNING: No python base report to output"
+        COMMAND ${PYTHON_COVERAGE_PATH} xml  -o ${Coverage_NAME}_base_python.xml ${INCLUDE_FLAGS} ${OMIT_FLAGS}
+                || echo "WARNING: No base python xml to output"
+        COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/python_base_coverage/${Coverage_NAME}_base_python.xml
+                                         ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_python.xml
+                || echo "WARNING: No base python xml to copy"
         DEPENDS ${PYTHON_BASE_COVERAGE_REPORT_DEPENDS}
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/python_base_coverage
       )
@@ -232,9 +236,13 @@ function(ADD_CODE_COVERAGE)
       add_custom_target(_run_tests_${PROJECT_NAME}_python_base_coverage_report
         COMMAND ${_code_coverage_SOURCE_DIR}/scripts/generate_base_coverage.py ${PROJECT_SOURCE_DIR}
                 --output ${PROJECT_BINARY_DIR}/python_base_coverage ${INCLUDE_PYTHON_FLAGS}
-        COMMAND ${PYTHON_COVERAGE_PATH} report ${INCLUDE_FLAGS} ${OMIT_FLAGS} || echo "WARNING: No python base report to output"
-        COMMAND ${PYTHON_COVERAGE_PATH} xml  -o ${Coverage_NAME}_base_python.xml ${INCLUDE_FLAGS} ${OMIT_FLAGS} || echo "WARNING: No base python xml to output"
-        COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/python_base_coverage/${Coverage_NAME}_base_python.xml ${PROJECT_BINARY_DIR}/ || echo "WARNING: No base python xml to copy"
+        COMMAND ${PYTHON_COVERAGE_PATH} report ${INCLUDE_FLAGS} ${OMIT_FLAGS}
+                || echo "WARNING: No python base report to output"
+        COMMAND ${PYTHON_COVERAGE_PATH} xml  -o ${Coverage_NAME}_base_python.xml ${INCLUDE_FLAGS} ${OMIT_FLAGS}
+                || echo "WARNING: No base python xml to output"
+        COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/python_base_coverage/${Coverage_NAME}_base_python.xml
+                                         ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_python.xml
+                || echo "WARNING: No base python xml to copy"
         DEPENDS ${PYTHON_BASE_COVERAGE_REPORT_DEPENDS}
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/python_base_coverage
       )
@@ -360,16 +368,21 @@ function(ADD_CODE_COVERAGE)
                 --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.removed ||  echo "WARNING: No cpp report to output"
         COMMAND ${LCOV_PATH} --extract ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.removed "'*${REAL_SOURCE_DIR}*'"
                 --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.cleaned || echo "WARNING: No cpp report to output"
-        COMMAND ${CMAKE_COMMAND} -E remove ${PROJECT_BINARY_DIR}/${Coverage_NAME}.base  ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info
-                                           ${PROJECT_BINARY_DIR}/${Coverage_NAME}.total || echo "WARNING: No cpp report to remove"
+        COMMAND ${CMAKE_COMMAND} -E remove ${PROJECT_BINARY_DIR}/${Coverage_NAME}.base
+                                           ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info
+                                           ${PROJECT_BINARY_DIR}/${Coverage_NAME}.total
+                || echo "WARNING: No cpp report to remove"
         COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/cpp_coverage || echo "WARNING: Error to create cpp coverage dir"
         COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.cleaned ${PROJECT_BINARY_DIR}/${Coverage_NAME}_cpp.info
                 || echo "WARNING: No cpp report to copy"
-        COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info ${PROJECT_BINARY_DIR}/cpp_coverage/${Coverage_NAME}.info
+        COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info
+                                         ${PROJECT_BINARY_DIR}/cpp_coverage/${Coverage_NAME}.info
                 || echo "WARNING: No cpp report to copy"
-        COMMAND ${CMAKE_COMMAND} -E rename ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.removed ${PROJECT_BINARY_DIR}/cpp_coverage/${Coverage_NAME}.info.removed
+        COMMAND ${CMAKE_COMMAND} -E rename ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.removed
+                                           ${PROJECT_BINARY_DIR}/cpp_coverage/${Coverage_NAME}.info.removed
                 || echo "WARNING: No cpp report to move"
-        COMMAND ${CMAKE_COMMAND} -E rename ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.cleaned ${PROJECT_BINARY_DIR}/cpp_coverage/${Coverage_NAME}.info.cleaned
+        COMMAND ${CMAKE_COMMAND} -E rename ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.cleaned
+                                           ${PROJECT_BINARY_DIR}/cpp_coverage/${Coverage_NAME}.info.cleaned
                 || echo "WARNING: No cpp report to move"
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
         DEPENDS _run_tests_${PROJECT_NAME}
@@ -377,10 +390,14 @@ function(ADD_CODE_COVERAGE)
 
     add_custom_command(
         OUTPUT ${PROJECT_BINARY_DIR}/${Coverage_NAME}_nosetests_python.xml
-        COMMAND ${PYTHON_COVERAGE_PATH} report ${INCLUDE_FLAGS} ${OMIT_FLAGS} || echo "WARNING: No python nosetests report to output"
-        COMMAND ${PYTHON_COVERAGE_PATH} xml  -o ${Coverage_NAME}_nosetests_python.xml ${INCLUDE_FLAGS} ${OMIT_FLAGS} || echo "WARNING: No python nosetests xml to output"
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/python_nosetests_coverage/ || echo "WARNING: Error to create python nosetests coverage dir"
-        COMMAND mv ${PROJECT_BINARY_DIR}/.coverage* ${PROJECT_BINARY_DIR}/python_nosetests_coverage/ || echo "WARNING: No python nosetests report to move"
+        COMMAND ${PYTHON_COVERAGE_PATH} report ${INCLUDE_FLAGS} ${OMIT_FLAGS}
+                || echo "WARNING: No python nosetests report to output"
+        COMMAND ${PYTHON_COVERAGE_PATH} xml  -o ${Coverage_NAME}_nosetests_python.xml ${INCLUDE_FLAGS} ${OMIT_FLAGS}
+                || echo "WARNING: No python nosetests xml to output"
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/python_nosetests_coverage/
+                || echo "WARNING: Error to create python nosetests coverage dir"
+        COMMAND mv ${PROJECT_BINARY_DIR}/.coverage* ${PROJECT_BINARY_DIR}/python_nosetests_coverage/
+                || echo "WARNING: No python nosetests report to move"
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
         DEPENDS _run_tests_${PROJECT_NAME}
     )
@@ -390,9 +407,13 @@ function(ADD_CODE_COVERAGE)
         OUTPUT ${PROJECT_BINARY_DIR}/${Coverage_NAME}_pytests_python.xml
                ${PROJECT_BINARY_DIR}/python_pytests_coverage/${Coverage_NAME}_pytests_python.xml
         COMMAND ${PYTHON_COVERAGE_PATH} combine || echo "WARNING: No python pytests coverage to combine"
-        COMMAND ${PYTHON_COVERAGE_PATH} report ${INCLUDE_FLAGS} ${OMIT_FLAGS} || echo "WARNING: No python pytests report to output"
-        COMMAND ${PYTHON_COVERAGE_PATH} xml  -o ${Coverage_NAME}_pytests_python.xml ${INCLUDE_FLAGS} ${OMIT_FLAGS} || echo "WARNING: No python pytests xml to output"
-        COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/python_pytests_coverage/${Coverage_NAME}_pytests_python.xml ${PROJECT_BINARY_DIR}/${Coverage_NAME}_pytests_python.xml || echo "WARNING: No python pytests xml to copy"
+        COMMAND ${PYTHON_COVERAGE_PATH} report ${INCLUDE_FLAGS} ${OMIT_FLAGS}
+                || echo "WARNING: No python pytests report to output"
+        COMMAND ${PYTHON_COVERAGE_PATH} xml  -o ${Coverage_NAME}_pytests_python.xml ${INCLUDE_FLAGS} ${OMIT_FLAGS}
+                || echo "WARNING: No python pytests xml to output"
+        COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/python_pytests_coverage/${Coverage_NAME}_pytests_python.xml
+                                         ${PROJECT_BINARY_DIR}/${Coverage_NAME}_pytests_python.xml
+                || echo "WARNING: No python pytests xml to copy"
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/python_pytests_coverage
         DEPENDS _run_tests_${PROJECT_NAME}
     )
@@ -404,12 +425,20 @@ function(ADD_CODE_COVERAGE)
         # Rename .coverage file generated by nosetests to avoid overwriting during combine step
         COMMAND if [ -f ${PROJECT_BINARY_DIR}/.coverage ]\; then ${CMAKE_COMMAND} -E rename ${PROJECT_BINARY_DIR}/.coverage ${PROJECT_BINARY_DIR}/.coverage.nosetests\; fi
         COMMAND ${PYTHON_COVERAGE_PATH} combine || echo "WARNING: No python coverage to combine"
-        COMMAND ${PYTHON_COVERAGE_PATH} report ${INCLUDE_FLAGS} ${OMIT_FLAGS} || echo "WARNING: No python report to output"
-        COMMAND ${PYTHON_COVERAGE_PATH} xml  -o ${Coverage_NAME}_python.xml ${INCLUDE_FLAGS} ${OMIT_FLAGS} || echo "WARNING: No python xml to output"
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/python_roslaunch_coverage/ || echo "WARNING: Error to create python roslaunch coverage dir"
-        COMMAND ${CMAKE_COMMAND} -E copy ${COVERAGE_DIR}/${Coverage_NAME}_python.xml ${PROJECT_BINARY_DIR}/ || echo "WARNING: No python xml to copy"
-        COMMAND ${CMAKE_COMMAND} -E copy ${COVERAGE_DIR}/.coverage* ${PROJECT_BINARY_DIR}/python_roslaunch_coverage/ || echo "WARNING: No python coverage to copy"
-        COMMAND ${CMAKE_COMMAND} -E copy ${COVERAGE_DIR}/${Coverage_NAME}_python.xml ${PROJECT_BINARY_DIR}/python_roslaunch_coverage || echo "WARNING: No python xml to copy"
+        COMMAND ${PYTHON_COVERAGE_PATH} report ${INCLUDE_FLAGS} ${OMIT_FLAGS}
+                || echo "WARNING: No python report to output"
+        COMMAND ${PYTHON_COVERAGE_PATH} xml  -o ${Coverage_NAME}_python.xml ${INCLUDE_FLAGS} ${OMIT_FLAGS}
+                || echo "WARNING: No python xml to output"
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/python_roslaunch_coverage/
+                || echo "WARNING: Error to create python roslaunch coverage dir"
+        COMMAND ${CMAKE_COMMAND} -E copy ${COVERAGE_DIR}/${Coverage_NAME}_python.xml
+                                         ${PROJECT_BINARY_DIR}/${Coverage_NAME}_python.xml
+                || echo "WARNING: No python xml to copy"
+        COMMAND ${CMAKE_COMMAND} -E copy ${COVERAGE_DIR}/.coverage* ${PROJECT_BINARY_DIR}/python_roslaunch_coverage/
+                || echo "WARNING: No python coverage to copy"
+        COMMAND ${CMAKE_COMMAND} -E copy ${COVERAGE_DIR}/${Coverage_NAME}_python.xml
+                                         ${PROJECT_BINARY_DIR}/python_roslaunch_coverage/${Coverage_NAME}_python.xml
+                || echo "WARNING: No python xml to copy"
         WORKING_DIRECTORY ${COVERAGE_DIR}
         DEPENDS ${PROJECT_BINARY_DIR}/${Coverage_NAME}_nosetests_python.xml
     )
