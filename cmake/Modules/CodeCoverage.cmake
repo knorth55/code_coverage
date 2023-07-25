@@ -293,6 +293,7 @@ function(ADD_CODE_COVERAGE)
     # Create python pytests coverage report
     add_custom_command(
         OUTPUT ${PROJECT_BINARY_DIR}/${Coverage_NAME}_pytests_python.xml
+               ${PROJECT_BINARY_DIR}/python_pytests_coverage/${Coverage_NAME}_pytests_python.xml
         COMMAND ${PYTHON_COVERAGE_PATH} combine || echo "WARNING: No python pytests coverage to combine"
         COMMAND ${PYTHON_COVERAGE_PATH} report ${INCLUDE_FLAGS} ${OMIT_FLAGS} || echo "WARNING: No python pytests report to output"
         COMMAND ${PYTHON_COVERAGE_PATH} xml  -o ${Coverage_NAME}_pytests_python.xml ${INCLUDE_FLAGS} ${OMIT_FLAGS} || echo "WARNING: No python pytests xml to output"
