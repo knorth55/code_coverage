@@ -229,6 +229,7 @@ function(ADD_CODE_COVERAGE)
                 || echo "WARNING: No base python xml to copy"
         DEPENDS ${PYTHON_BASE_COVERAGE_REPORT_DEPENDS}
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/python_base_coverage
+        COMMENT "Generating base python coverage report."
       )
       # hidden test target which depends on building all tests and cleaning test results
       add_custom_target(_run_tests_${PROJECT_NAME}_python_base_coverage_report
@@ -241,6 +242,7 @@ function(ADD_CODE_COVERAGE)
                 || echo "WARNING: No base python xml to copy"
         DEPENDS ${PYTHON_BASE_COVERAGE_REPORT_DEPENDS}
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/python_base_coverage
+        COMMENT "Generating base python coverage report."
       )
 
       # create cpp base coverage report
@@ -275,6 +277,7 @@ function(ADD_CODE_COVERAGE)
                                            ${PROJECT_BINARY_DIR}/cpp_base_coverage/${Coverage_NAME}_base_cpp.info.cleaned
                 || echo "WARNING: No base cpp report to move"
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+        COMMENT "Generating base cpp coverage report."
       )
       # hidden test target which depends on building all tests and cleaning test results
       add_custom_target(_run_tests_${PROJECT_NAME}_cpp_base_coverage_report
@@ -306,6 +309,7 @@ function(ADD_CODE_COVERAGE)
                                            ${PROJECT_BINARY_DIR}/cpp_base_coverage/${Coverage_NAME}_base_cpp.info.cleaned
                 || echo "WARNING: No base cpp report to move"
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+        COMMENT "Generating base cpp coverage report."
       )
     else()
       # dummy targets for the case test and coverage are not enabled
