@@ -323,10 +323,9 @@ function(ADD_CODE_COVERAGE)
     endif()
 
     # add base coverage report generation as run_tests_${PROJECT_NAME} and _run_tests_${PROJECT_NAME} dependency
-    add_dependencies(run_tests_${PROJECT_NAME}
+    add_dependencies(tests
                      run_tests_${PROJECT_NAME}_python_base_coverage_report
-                     run_tests_${PROJECT_NAME}_cpp_base_coverage_report)
-    add_dependencies(_run_tests_${PROJECT_NAME}
+                     run_tests_${PROJECT_NAME}_cpp_base_coverage_report
                      _run_tests_${PROJECT_NAME}_python_base_coverage_report
                      _run_tests_${PROJECT_NAME}_cpp_base_coverage_report)
 
@@ -347,9 +346,8 @@ function(ADD_CODE_COVERAGE)
         COMMENT "Resetting PYTHON code coverage counters to zero."
     )
 
-    # Cleanup before we run tests
-    add_dependencies(_run_tests_${PROJECT_NAME} ${Coverage_NAME}_cleanup_cpp)
-    add_dependencies(_run_tests_${PROJECT_NAME} ${Coverage_NAME}_cleanup_py)
+    add_dependencies(tests ${Coverage_NAME}_cleanup_cpp)
+    add_dependencies(tests ${Coverage_NAME}_cleanup_py)
 
     # Create C++ coverage report
     add_custom_command(
