@@ -120,13 +120,12 @@ endif()
 #
 # ADD_CODE_COVERAGE(
 #     NAME testrunner_coverage                    # New target name
-#     DEPENDENCIES testrunner                     # Dependencies to build first
 # )
 function(ADD_CODE_COVERAGE)
 
     set(options NONE)
     set(oneValueArgs NAME)
-    set(multiValueArgs DEPENDENCIES;EXCLUDES;INCLUDE_PYTHON_DIRECTORIES)
+    set(multiValueArgs EXCLUDES;INCLUDE_PYTHON_DIRECTORIES)
     cmake_parse_arguments(Coverage "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     if(NOT LCOV_PATH)
@@ -338,7 +337,6 @@ function(ADD_CODE_COVERAGE)
         # Create baseline to make sure untouched files show up in the report
         COMMAND ${LCOV_PATH} -c -i -d . -o ${PROJECT_BINARY_DIR}/${Coverage_NAME}.base
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
-        DEPENDS ${Coverage_DEPENDENCIES}
         COMMENT "Resetting CPP code coverage counters to zero."
     )
 
