@@ -330,7 +330,6 @@ function(ADD_CODE_COVERAGE)
         # Cleanup lcov
         COMMAND ${LCOV_PATH} --directory . --zerocounters
         # Create baseline to make sure untouched files show up in the report
-        COMMAND ${LCOV_PATH} -c -i -d . -o ${PROJECT_BINARY_DIR}/${Coverage_NAME}.base
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
         COMMENT "Resetting CPP code coverage counters to zero."
     )
@@ -354,14 +353,13 @@ function(ADD_CODE_COVERAGE)
         COMMAND ${LCOV_PATH} ${LCOV_EXTRA_FLAGS} --directory . --capture --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info
                 || echo "WARNING: No cpp report to output"
         # add baseline counters
-        COMMAND ${LCOV_PATH} -a ${PROJECT_BINARY_DIR}/${Coverage_NAME}.base -a ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info
+        COMMAND ${LCOV_PATH} -a ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info -a ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info
                 --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}.total || echo "WARNING: No cpp report to output"
         COMMAND ${LCOV_PATH} --remove ${PROJECT_BINARY_DIR}/${Coverage_NAME}.total ${LCOV_REMOVES}
                 --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.removed ||  echo "WARNING: No cpp report to output"
         COMMAND ${LCOV_PATH} --extract ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.removed "'*${REAL_SOURCE_DIR}*'"
                 --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.cleaned || echo "WARNING: No cpp report to output"
-        COMMAND ${CMAKE_COMMAND} -E remove ${PROJECT_BINARY_DIR}/${Coverage_NAME}.base
-                                           ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info
+        COMMAND ${CMAKE_COMMAND} -E remove ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info
                                            ${PROJECT_BINARY_DIR}/${Coverage_NAME}.total
                 || echo "WARNING: No cpp report to remove"
         COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/cpp_coverage || echo "WARNING: Error to create cpp coverage dir"
@@ -378,6 +376,7 @@ function(ADD_CODE_COVERAGE)
                 || echo "WARNING: No cpp report to move"
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
         DEPENDS _run_tests_${PROJECT_NAME}
+                ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info
     )
 
     add_custom_command(
