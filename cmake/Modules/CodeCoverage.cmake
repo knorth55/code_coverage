@@ -248,8 +248,6 @@ function(ADD_CODE_COVERAGE)
       # lcov -c -i -d in ${PROJECT_BINARY_DIR} list up cpp and header files built with coverage flags and generate base coverage report
       # base coverage report is need to cover all cpp and header files, including non-tested files.
       add_custom_target(run_tests_${PROJECT_NAME}_cpp_base_coverage_report
-        # Cleanup lcov
-        COMMAND ${LCOV_PATH} --directory . --zerocounters
         # Create baseline to make sure untouched files show up in the report
         COMMAND ${LCOV_PATH} -c -i -d . -o ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.total
                 || echo "WARNING: No base cpp report to output"
@@ -280,8 +278,6 @@ function(ADD_CODE_COVERAGE)
       )
       # hidden test target which depends on building all tests and cleaning test results
       add_custom_target(_run_tests_${PROJECT_NAME}_cpp_base_coverage_report
-        # Cleanup lcov
-        COMMAND ${LCOV_PATH} --directory . --zerocounters
         # Create baseline to make sure untouched files show up in the report
         COMMAND ${LCOV_PATH} -c -i -d . -o ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.total
                 || echo "WARNING: No base cpp report to output"
@@ -346,8 +342,8 @@ function(ADD_CODE_COVERAGE)
         COMMENT "Resetting PYTHON code coverage counters to zero."
     )
 
-    add_dependencies(tests ${Coverage_NAME}_cleanup_cpp)
-    add_dependencies(tests ${Coverage_NAME}_cleanup_py)
+    add_dependencies(_run_tests_${PROJECT_NAME}_python_base_coverage_report ${Coverage_NAME}_cleanup_py)
+    add_dependencies(_run_tests_${PROJECT_NAME}_cpp_base_coverage_report ${Coverage_NAME}_cleanup_cpp)
 
     # Create C++ coverage report
     add_custom_command(
