@@ -151,6 +151,22 @@ function(ADD_CODE_COVERAGE)
     set(LCOV_REMOVES ${Coverage_EXCLUDES})
     list(APPEND LCOV_REMOVES "'*${REAL_SOURCE_DIR}/test/*'" "'*${REAL_SOURCE_DIR}/tests/*'")
 
+    # Cleanup C++ counters
+    add_custom_target(${Coverage_NAME}_cleanup_cpp
+        # Cleanup lcov
+        COMMAND ${LCOV_PATH} --directory . --zerocounters
+        # Create baseline to make sure untouched files show up in the report
+        WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+        COMMENT "Resetting CPP code coverage counters to zero."
+    )
+
+    # Cleanup python counters
+    add_custom_target(${Coverage_NAME}_cleanup_py
+        COMMAND ${PYTHON_COVERAGE_PATH} erase
+        WORKING_DIRECTORY ${COVERAGE_DIR}
+        COMMENT "Resetting PYTHON code coverage counters to zero."
+    )
+
     # add target for non-test repo
     # we need to set run_tests_${PROJECT_NAME} and _run_tests_${PROJECT_NAME} for repo with no-test
     # otherwise test fails.
@@ -218,7 +234,8 @@ function(ADD_CODE_COVERAGE)
       # create python base coverage report
       # generate_base_coverage.py list up python files in the repo and generate base coverage report
       # base coverage report is needed to cover all python files, including non-tested files.
-      add_custom_target(run_tests_${PROJECT_NAME}_python_base_coverage_report
+      add_custom_command(
+        OUTPUT ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_python.xml
         COMMAND ${_code_coverage_SOURCE_DIR}/scripts/generate_base_coverage.py ${PROJECT_SOURCE_DIR}
                 --output ${PROJECT_BINARY_DIR}/python_base_coverage ${INCLUDE_PYTHON_FLAGS}
         COMMAND ${PYTHON_COVERAGE_PATH} xml  -o ${Coverage_NAME}_base_python.xml ${INCLUDE_FLAGS} ${OMIT_FLAGS}
@@ -226,28 +243,22 @@ function(ADD_CODE_COVERAGE)
         COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/python_base_coverage/${Coverage_NAME}_base_python.xml
                                          ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_python.xml
                 || echo "WARNING: No base python xml to copy"
-        DEPENDS ${PYTHON_BASE_COVERAGE_REPORT_DEPENDS}
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/python_base_coverage
         COMMENT "Generating base python coverage report."
+        DEPENDS ${PYTHON_BASE_COVERAGE_REPORT_DEPENDS}
+                ${Coverage_NAME}_cleanup_py
       )
+      add_custom_target(run_tests_${PROJECT_NAME}_python_base_coverage_report
+                        DEPENDS ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_python.xml)
       # hidden test target which depends on building all tests and cleaning test results
       add_custom_target(_run_tests_${PROJECT_NAME}_python_base_coverage_report
-        COMMAND ${_code_coverage_SOURCE_DIR}/scripts/generate_base_coverage.py ${PROJECT_SOURCE_DIR}
-                --output ${PROJECT_BINARY_DIR}/python_base_coverage ${INCLUDE_PYTHON_FLAGS}
-        COMMAND ${PYTHON_COVERAGE_PATH} xml  -o ${Coverage_NAME}_base_python.xml ${INCLUDE_FLAGS} ${OMIT_FLAGS}
-                || echo "WARNING: No base python xml to output"
-        COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/python_base_coverage/${Coverage_NAME}_base_python.xml
-                                         ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_python.xml
-                || echo "WARNING: No base python xml to copy"
-        DEPENDS ${PYTHON_BASE_COVERAGE_REPORT_DEPENDS}
-        WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/python_base_coverage
-        COMMENT "Generating base python coverage report."
-      )
+                        DEPENDS ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_python.xml)
 
       # create cpp base coverage report
       # lcov -c -i -d in ${PROJECT_BINARY_DIR} list up cpp and header files built with coverage flags and generate base coverage report
       # base coverage report is need to cover all cpp and header files, including non-tested files.
-      add_custom_target(run_tests_${PROJECT_NAME}_cpp_base_coverage_report
+      add_custom_command(
+        OUTPUT ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info
         # Create baseline to make sure untouched files show up in the report
         COMMAND ${LCOV_PATH} -c -i -d . -o ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.total
                 || echo "WARNING: No base cpp report to output"
@@ -275,37 +286,13 @@ function(ADD_CODE_COVERAGE)
                 || echo "WARNING: No base cpp report to move"
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
         COMMENT "Generating base cpp coverage report."
+        DEPENDS ${Coverage_NAME}_cleanup_cpp
       )
+      add_custom_target(run_tests_${PROJECT_NAME}_cpp_base_coverage_report
+                        DEPENDS ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info)
       # hidden test target which depends on building all tests and cleaning test results
       add_custom_target(_run_tests_${PROJECT_NAME}_cpp_base_coverage_report
-        # Create baseline to make sure untouched files show up in the report
-        COMMAND ${LCOV_PATH} -c -i -d . -o ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.total
-                || echo "WARNING: No base cpp report to output"
-        COMMAND ${LCOV_PATH} --remove ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.total ${LCOV_REMOVES}
-                             --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.removed
-                ||  echo "WARNING: No base cpp report to output"
-        COMMAND ${LCOV_PATH} --extract ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.removed "'*${REAL_SOURCE_DIR}*'"
-                             --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.cleaned
-                || echo "WARNING: No base cpp report to output"
-        COMMAND ${CMAKE_COMMAND} -E remove ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.total
-                || echo "WARNING: No base cpp report to remove"
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/cpp_base_coverage
-                || echo "WARNING: Error to create base cpp coverage dir"
-        COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.cleaned
-                                         ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info
-                || echo "WARNING: No base cpp report to copy"
-        COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info
-                                         ${PROJECT_BINARY_DIR}/cpp_base_coverage/${Coverage_NAME}_base_cpp.info
-                || echo "WARNING: No base cpp report to copy"
-        COMMAND ${CMAKE_COMMAND} -E rename ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.removed
-                                           ${PROJECT_BINARY_DIR}/cpp_base_coverage/${Coverage_NAME}_base_cpp.info.removed
-                || echo "WARNING: No base cpp report to move"
-        COMMAND ${CMAKE_COMMAND} -E rename ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.cleaned
-                                           ${PROJECT_BINARY_DIR}/cpp_base_coverage/${Coverage_NAME}_base_cpp.info.cleaned
-                || echo "WARNING: No base cpp report to move"
-        WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
-        COMMENT "Generating base cpp coverage report."
-      )
+                        DEPENDS ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info)
     else()
       # dummy targets for the case test and coverage are not enabled
       add_custom_target(run_tests_${PROJECT_NAME}_python_base_coverage_report
@@ -318,31 +305,16 @@ function(ADD_CODE_COVERAGE)
           COMMAND "${CMAKE_COMMAND}" "-E" "echo" "Skipping cpp base coverage report target." )
     endif()
 
-    # add base coverage report generation as run_tests_${PROJECT_NAME} and _run_tests_${PROJECT_NAME} dependency
+
+    # this dependency is to generate base report before tests
     add_dependencies(tests
-                     run_tests_${PROJECT_NAME}_python_base_coverage_report
-                     run_tests_${PROJECT_NAME}_cpp_base_coverage_report
                      _run_tests_${PROJECT_NAME}_python_base_coverage_report
                      _run_tests_${PROJECT_NAME}_cpp_base_coverage_report)
-
-    # Cleanup C++ counters
-    add_custom_target(${Coverage_NAME}_cleanup_cpp
-        # Cleanup lcov
-        COMMAND ${LCOV_PATH} --directory . --zerocounters
-        # Create baseline to make sure untouched files show up in the report
-        WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
-        COMMENT "Resetting CPP code coverage counters to zero."
-    )
-
-    # Cleanup python counters
-    add_custom_target(${Coverage_NAME}_cleanup_py
-        COMMAND ${PYTHON_COVERAGE_PATH} erase
-        WORKING_DIRECTORY ${COVERAGE_DIR}
-        COMMENT "Resetting PYTHON code coverage counters to zero."
-    )
-
-    add_dependencies(_run_tests_${PROJECT_NAME}_python_base_coverage_report ${Coverage_NAME}_cleanup_py)
-    add_dependencies(_run_tests_${PROJECT_NAME}_cpp_base_coverage_report ${Coverage_NAME}_cleanup_cpp)
+    # this dependency is to generate base report if there is no tests
+    # add base coverage report generation as run_tests_${PROJECT_NAME} and _run_tests_${PROJECT_NAME} dependency
+    add_dependencies(_run_tests_${PROJECT_NAME}
+                     _run_tests_${PROJECT_NAME}_python_base_coverage_report
+                     _run_tests_${PROJECT_NAME}_cpp_base_coverage_report)
 
     # Create C++ coverage report
     add_custom_command(
@@ -376,6 +348,7 @@ function(ADD_CODE_COVERAGE)
                 || echo "WARNING: No cpp report to move"
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
         DEPENDS _run_tests_${PROJECT_NAME}
+                _run_tests_${PROJECT_NAME}_cpp_base_coverage_report
                 ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info
     )
 
