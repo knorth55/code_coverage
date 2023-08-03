@@ -168,16 +168,10 @@ function(ADD_CODE_COVERAGE)
     )
 
     # add target for non-test repo
-    # we need to set run_tests_${PROJECT_NAME} and _run_tests_${PROJECT_NAME} for repo with no-test
-    # otherwise test fails.
-    # catkin tools executed either runrun_tests_${PROJECT_NAME} or _run_tests_${PROJECT_NAME}.
-    # run_tests_${PROJECT_NAME} and _run_tests_${PROJECT_NAME} does not run simaltaneously.
+    # we need to set _run_tests_${PROJECT_NAME} for repo with no-te, otherwise test fails.
+    # catkin tools executes _run_tests_${PROJECT_NAME}.
     # _run_tests_${PROJECT_NAME} is for cleaning test result and run tests.
     # https://github.com/ros/catkin/commit/f931db5c8c14475a9d74ffc65b9dbbe45c98d11d
-    if(NOT TARGET run_tests_${PROJECT_NAME})
-      add_custom_target(run_tests_${PROJECT_NAME})
-    endif()
-
     if(NOT TARGET _run_tests_${PROJECT_NAME})
       # create hidden meta target which depends on hidden test targets which depend on clean_test_results
       add_custom_target(_run_tests_${PROJECT_NAME})
@@ -248,8 +242,6 @@ function(ADD_CODE_COVERAGE)
         DEPENDS ${PYTHON_BASE_COVERAGE_REPORT_DEPENDS}
                 ${Coverage_NAME}_cleanup_py
       )
-      add_custom_target(run_tests_${PROJECT_NAME}_python_base_coverage_report
-                        DEPENDS ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_python.xml)
       # hidden test target which depends on building all tests and cleaning test results
       add_custom_target(_run_tests_${PROJECT_NAME}_python_base_coverage_report
                         DEPENDS ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_python.xml)
@@ -288,19 +280,13 @@ function(ADD_CODE_COVERAGE)
         COMMENT "Generating base cpp coverage report."
         DEPENDS ${Coverage_NAME}_cleanup_cpp
       )
-      add_custom_target(run_tests_${PROJECT_NAME}_cpp_base_coverage_report
-                        DEPENDS ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info)
       # hidden test target which depends on building all tests and cleaning test results
       add_custom_target(_run_tests_${PROJECT_NAME}_cpp_base_coverage_report
                         DEPENDS ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info)
     else()
       # dummy targets for the case test and coverage are not enabled
-      add_custom_target(run_tests_${PROJECT_NAME}_python_base_coverage_report
-          COMMAND "${CMAKE_COMMAND}" "-E" "echo" "Skipping python base coverage report target." )
       add_custom_target(_run_tests_${PROJECT_NAME}_python_base_coverage_report
           COMMAND "${CMAKE_COMMAND}" "-E" "echo" "Skipping python base coverage report target." )
-      add_custom_target(run_tests_${PROJECT_NAME}_cpp_base_coverage_report
-          COMMAND "${CMAKE_COMMAND}" "-E" "echo" "Skipping cpp base coverage report target." )
       add_custom_target(_run_tests_${PROJECT_NAME}_cpp_base_coverage_report
           COMMAND "${CMAKE_COMMAND}" "-E" "echo" "Skipping cpp base coverage report target." )
     endif()
