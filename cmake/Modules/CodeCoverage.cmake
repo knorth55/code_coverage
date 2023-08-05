@@ -198,10 +198,9 @@ function(ADD_CODE_COVERAGE)
       endif()
 
       # list up python source directory candidates
-      if("${Coverage_INCLUDE_PYTHON_DIRECTORIES}" STREQUAL "")
-        set(PROJECT_PYTHON_SOURCE_DIR_CANDIDATES bin node_scripts scripts src)
-      else()
-        set(PROJECT_PYTHON_SOURCE_DIR_CANDIDATES ${Coverage_INCLUDE_PYTHON_DIRECTORIES})
+      set(PROJECT_PYTHON_SOURCE_DIR_CANDIDATES bin ci_scripts node_scripts scripts src)
+      if(NOT "${Coverage_INCLUDE_PYTHON_DIRECTORIES}" STREQUAL "")
+        list(APPEND PROJECT_PYTHON_SOURCE_DIR_CANDIDATES ${Coverage_INCLUDE_PYTHON_DIRECTORIES})
       endif()
 
       # check and create python source directories lists
