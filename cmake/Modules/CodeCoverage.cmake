@@ -255,7 +255,8 @@ function(ADD_CODE_COVERAGE)
         OUTPUT ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info
         # Create baseline to make sure untouched files show up in the report
         COMMAND ${LCOV_PATH} ${LCOV_EXTRA_FLAGS}
-                             -c -i -d . -o ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.total
+                             --initial --directory . --capture
+                             --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.total
                 || echo "WARNING: No base cpp report to output"
         COMMAND ${LCOV_PATH} ${LCOV_EXTRA_FLAGS}
                              --remove ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info.total ${LCOV_REMOVES}
