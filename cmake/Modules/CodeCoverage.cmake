@@ -415,7 +415,7 @@ function(ADD_CODE_COVERAGE)
   endif()
 
   # Create rostest C++ coverage report
-  if (TARGET _run_tests_${PROJECT_NAME}_rostest)
+  if(TARGET _run_tests_${PROJECT_NAME}_rostest)
     # create original rostest C++ coverage report
     add_custom_command(
       OUTPUT
@@ -452,7 +452,8 @@ function(ADD_CODE_COVERAGE)
         ${LCOV_PATH} ${LCOV_EXTRA_FLAGS}
         -a ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info
         -a ${PROJECT_BINARY_DIR}/rostest_cpp_coverage/${Coverage_NAME}_rostest_cpp.info.original
-        --output-file ${PROJECT_BINARY_DIR}/rostest_cpp_coverage/${Coverage_NAME}_rostest_cpp.info.total
+        --output-file
+        ${PROJECT_BINARY_DIR}/rostest_cpp_coverage/${Coverage_NAME}_rostest_cpp.info.total
       COMMAND
         ${LCOV_PATH} ${LCOV_EXTRA_FLAGS} --remove
         ${PROJECT_BINARY_DIR}/rostest_cpp_coverage/${Coverage_NAME}_rostest_cpp.info.total
@@ -490,7 +491,7 @@ function(ADD_CODE_COVERAGE)
 
   # run _create_coverage_report_${PROJECT_NAME}_gtest
   # before all rostest target tests_${PROJECT_NAME}_rostest
-  if (TARGET tests_${PROJECT_NAME}_rostest AND
+  if(TARGET tests_${PROJECT_NAME}_rostest AND
       TARGET _create_coverage_report_${PROJECT_NAME}_gtest)
     add_dependencies(
       tests_${PROJECT_NAME}_rostest
@@ -499,7 +500,7 @@ function(ADD_CODE_COVERAGE)
   endif()
 
   # Create nosetests python coverage report
-  if (TARGET _run_tests_${PROJECT_NAME}_nosetests)
+  if(TARGET _run_tests_${PROJECT_NAME}_nosetests)
     add_custom_command(
       OUTPUT
         ${PROJECT_BINARY_DIR}/${Coverage_NAME}_nosetests_python.xml
@@ -563,7 +564,7 @@ function(ADD_CODE_COVERAGE)
   endif()
 
   # Create rostest python coverage report
-  if (TARGET _run_tests_${PROJECT_NAME}_rostest)
+  if(TARGET _run_tests_${PROJECT_NAME}_rostest)
     add_custom_command(
       OUTPUT
         ${PROJECT_BINARY_DIR}/${Coverage_NAME}_rostest_python.xml
@@ -575,7 +576,8 @@ function(ADD_CODE_COVERAGE)
           ${PROJECT_BINARY_DIR}/.coverage
           ${PROJECT_BINARY_DIR}/.coverage.nosetests\;
         fi
-      COMMAND ${PYTHON_COVERAGE_PATH} combine || echo "WARNING: No rostest python coverage to combine"
+      COMMAND
+        ${PYTHON_COVERAGE_PATH} combine || echo "WARNING: No rostest python coverage to combine"
       COMMAND
         ${CMAKE_COMMAND} -E make_directory
         ${PROJECT_BINARY_DIR}/rostest_python_coverage/
