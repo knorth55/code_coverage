@@ -379,27 +379,35 @@ function(ADD_CODE_COVERAGE)
         ${PROJECT_BINARY_DIR}/gtest_cpp_coverage/${Coverage_NAME}_gtest_cpp.info.cleaned
       # add baseline counters
       COMMAND
-        ${LCOV_PATH} ${LCOV_EXTRA_FLAGS}
-        -a ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info
-        -a ${PROJECT_BINARY_DIR}/gtest_cpp_coverage/${Coverage_NAME}_gtest_cpp.info.original
-        --output-file ${PROJECT_BINARY_DIR}/gtest_cpp_coverage/${Coverage_NAME}_gtest_cpp.info.total
+        if [ -s ${PROJECT_BINARY_DIR}/gtest_cpp_coverage/${Coverage_NAME}_gtest_cpp.info.original ]\; then
+          ${LCOV_PATH} ${LCOV_EXTRA_FLAGS}
+          -a ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info
+          -a ${PROJECT_BINARY_DIR}/gtest_cpp_coverage/${Coverage_NAME}_gtest_cpp.info.original
+          --output-file ${PROJECT_BINARY_DIR}/gtest_cpp_coverage/${Coverage_NAME}_gtest_cpp.info.total\;
+        fi
       COMMAND
-        ${LCOV_PATH} ${LCOV_EXTRA_FLAGS} --remove
-        ${PROJECT_BINARY_DIR}/gtest_cpp_coverage/${Coverage_NAME}_gtest_cpp.info.total
-        ${LCOV_REMOVES}
-        --output-file
-        ${PROJECT_BINARY_DIR}/gtest_cpp_coverage/${Coverage_NAME}_gtest_cpp.info.removed
+        if [ -f ${PROJECT_BINARY_DIR}/gtest_cpp_coverage/${Coverage_NAME}_gtest_cpp.info.total ]\; then
+          ${LCOV_PATH} ${LCOV_EXTRA_FLAGS} --remove
+          ${PROJECT_BINARY_DIR}/gtest_cpp_coverage/${Coverage_NAME}_gtest_cpp.info.total
+          ${LCOV_REMOVES}
+          --output-file
+          ${PROJECT_BINARY_DIR}/gtest_cpp_coverage/${Coverage_NAME}_gtest_cpp.info.removed\;
+        fi
       COMMAND
-        ${LCOV_PATH} ${LCOV_EXTRA_FLAGS}
-        --extract
-        ${PROJECT_BINARY_DIR}/gtest_cpp_coverage/${Coverage_NAME}_gtest_cpp.info.removed
-        "'*${REAL_SOURCE_DIR}*'"
-        --output-file
-        ${PROJECT_BINARY_DIR}/gtest_cpp_coverage/${Coverage_NAME}_gtest_cpp.info.cleaned
+        if [ -f ${PROJECT_BINARY_DIR}/gtest_cpp_coverage/${Coverage_NAME}_gtest_cpp.info.removed ]\; then
+          ${LCOV_PATH} ${LCOV_EXTRA_FLAGS}
+          --extract
+          ${PROJECT_BINARY_DIR}/gtest_cpp_coverage/${Coverage_NAME}_gtest_cpp.info.removed
+          "'*${REAL_SOURCE_DIR}*'"
+          --output-file
+          ${PROJECT_BINARY_DIR}/gtest_cpp_coverage/${Coverage_NAME}_gtest_cpp.info.cleaned\;
+        fi
       COMMAND
-        ${CMAKE_COMMAND} -E copy
-        ${PROJECT_BINARY_DIR}/gtest_cpp_coverage/${Coverage_NAME}_gtest_cpp.info.cleaned
-        ${PROJECT_BINARY_DIR}/${Coverage_NAME}_gtest_cpp.info
+        if [ -f ${PROJECT_BINARY_DIR}/gtest_cpp_coverage/${Coverage_NAME}_gtest_cpp.info.cleaned ]\; then
+          ${CMAKE_COMMAND} -E copy
+          ${PROJECT_BINARY_DIR}/gtest_cpp_coverage/${Coverage_NAME}_gtest_cpp.info.cleaned
+          ${PROJECT_BINARY_DIR}/${Coverage_NAME}_gtest_cpp.info\;
+        fi
       WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
       DEPENDS
         _run_tests_${PROJECT_NAME}_gtest
@@ -454,28 +462,36 @@ function(ADD_CODE_COVERAGE)
         ${PROJECT_BINARY_DIR}/rostest_cpp_coverage/${Coverage_NAME}_rostest_cpp.info.cleaned
       # add baseline counters
       COMMAND
-        ${LCOV_PATH} ${LCOV_EXTRA_FLAGS}
-        -a ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info
-        -a ${PROJECT_BINARY_DIR}/rostest_cpp_coverage/${Coverage_NAME}_rostest_cpp.info.original
-        --output-file
-        ${PROJECT_BINARY_DIR}/rostest_cpp_coverage/${Coverage_NAME}_rostest_cpp.info.total
+        if [ -s ${PROJECT_BINARY_DIR}/rostest_cpp_coverage/${Coverage_NAME}_rostest_cpp.info.original ]\; then
+          ${LCOV_PATH} ${LCOV_EXTRA_FLAGS}
+          -a ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info
+          -a ${PROJECT_BINARY_DIR}/rostest_cpp_coverage/${Coverage_NAME}_rostest_cpp.info.original
+          --output-file
+          ${PROJECT_BINARY_DIR}/rostest_cpp_coverage/${Coverage_NAME}_rostest_cpp.info.total\;
+        fi
       COMMAND
-        ${LCOV_PATH} ${LCOV_EXTRA_FLAGS} --remove
-        ${PROJECT_BINARY_DIR}/rostest_cpp_coverage/${Coverage_NAME}_rostest_cpp.info.total
-        ${LCOV_REMOVES}
-        --output-file
-        ${PROJECT_BINARY_DIR}/rostest_cpp_coverage/${Coverage_NAME}_rostest_cpp.info.removed
+        if [ -f ${PROJECT_BINARY_DIR}/rostest_cpp_coverage/${Coverage_NAME}_rostest_cpp.info.total ]\; then
+          ${LCOV_PATH} ${LCOV_EXTRA_FLAGS} --remove
+          ${PROJECT_BINARY_DIR}/rostest_cpp_coverage/${Coverage_NAME}_rostest_cpp.info.total
+          ${LCOV_REMOVES}
+          --output-file
+          ${PROJECT_BINARY_DIR}/rostest_cpp_coverage/${Coverage_NAME}_rostest_cpp.info.removed\;
+        fi
       COMMAND
-        ${LCOV_PATH} ${LCOV_EXTRA_FLAGS}
-        --extract
-        ${PROJECT_BINARY_DIR}/rostest_cpp_coverage/${Coverage_NAME}_rostest_cpp.info.removed
-        "'*${REAL_SOURCE_DIR}*'"
-        --output-file
-        ${PROJECT_BINARY_DIR}/rostest_cpp_coverage/${Coverage_NAME}_rostest_cpp.info.cleaned
+        if [ -f ${PROJECT_BINARY_DIR}/rostest_cpp_coverage/${Coverage_NAME}_rostest_cpp.info.removed ]\; then
+          ${LCOV_PATH} ${LCOV_EXTRA_FLAGS}
+          --extract
+          ${PROJECT_BINARY_DIR}/rostest_cpp_coverage/${Coverage_NAME}_rostest_cpp.info.removed
+          "'*${REAL_SOURCE_DIR}*'"
+          --output-file
+          ${PROJECT_BINARY_DIR}/rostest_cpp_coverage/${Coverage_NAME}_rostest_cpp.info.cleaned\;
+        fi
       COMMAND
-        ${CMAKE_COMMAND} -E copy
-        ${PROJECT_BINARY_DIR}/rostest_cpp_coverage/${Coverage_NAME}_rostest_cpp.info.cleaned
-        ${PROJECT_BINARY_DIR}/${Coverage_NAME}_rostest_cpp.info
+        if [ -f ${PROJECT_BINARY_DIR}/rostest_cpp_coverage/${Coverage_NAME}_rostest_cpp.info.cleaned ]\; then
+          ${CMAKE_COMMAND} -E copy
+          ${PROJECT_BINARY_DIR}/rostest_cpp_coverage/${Coverage_NAME}_rostest_cpp.info.cleaned
+          ${PROJECT_BINARY_DIR}/${Coverage_NAME}_rostest_cpp.info\;
+        fi
       WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
       DEPENDS
         _run_tests_${PROJECT_NAME}_rostest
