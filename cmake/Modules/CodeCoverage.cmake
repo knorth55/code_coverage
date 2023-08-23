@@ -180,7 +180,7 @@ function(ADD_CODE_COVERAGE)
   if(NOT DEFINED CATKIN_ENABLE_TESTING OR CATKIN_ENABLE_TESTING)
     # create python base coverage directory
     add_custom_target(
-      create_python_base_coverage_dir
+      _create_python_base_coverage_dir
       "${CMAKE_COMMAND}" "-E" "make_directory"
       ${PROJECT_BINARY_DIR}/python_base_coverage
     )
@@ -221,7 +221,7 @@ function(ADD_CODE_COVERAGE)
 
     # create depends list
     set(PYTHON_BASE_COVERAGE_REPORT_DEPENDS
-      create_python_base_coverage_dir
+      _create_python_base_coverage_dir
       ${_code_coverage_SOURCE_DIR}/scripts/generate_base_coverage.py
     )
     list(APPEND PYTHON_BASE_COVERAGE_REPORT_DEPENDS ${PROJECT_PYTHON_SOURCE_DIRS})
