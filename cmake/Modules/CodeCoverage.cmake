@@ -519,7 +519,7 @@ function(ADD_CODE_COVERAGE)
         ${INCLUDE_FLAGS} ${OMIT_FLAGS}
         || echo "WARNING: nosetests python coverage to report"
       COMMAND
-        if [ -f  ${PROJECT_BINARY_DIR}/nosetests_python_coverage/${Coverage_NAME}_nosetests_python.xml ] \;
+        if [ -f  ${PROJECT_BINARY_DIR}/nosetests_python_coverage/${Coverage_NAME}_nosetests_python.xml ] \; then
           ${CMAKE_COMMAND} -E copy
           ${PROJECT_BINARY_DIR}/nosetests_python_coverage/${Coverage_NAME}_nosetests_python.xml
           ${PROJECT_BINARY_DIR}/${Coverage_NAME}_nosetests_python.xml\;
