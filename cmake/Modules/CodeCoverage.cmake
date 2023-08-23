@@ -418,7 +418,10 @@ function(ADD_CODE_COVERAGE)
     )
     add_custom_target(
       ${Coverage_NAME}_gtest_cpp_info
-      DEPENDS ${PROJECT_BINARY_DIR}/${Coverage_NAME}_gtest_cpp.info)
+      DEPENDS
+        _run_tests_${PROJECT_NAME}_gtest
+        ${PROJECT_BINARY_DIR}/${Coverage_NAME}_gtest_cpp.info
+    )
   else()
     # dummy targets for the case if there is no gtest
     add_custom_target(${Coverage_NAME}_gtest_cpp_info
@@ -502,7 +505,10 @@ function(ADD_CODE_COVERAGE)
     )
     add_custom_target(
       ${Coverage_NAME}_rostest_cpp_info
-      DEPENDS ${PROJECT_BINARY_DIR}/${Coverage_NAME}_rostest_cpp.info)
+      DEPENDS
+        _run_tests_${PROJECT_NAME}_rostest
+        ${PROJECT_BINARY_DIR}/${Coverage_NAME}_rostest_cpp.info
+      )
   else()
     # dummy targets for the case if there is no rostest
     add_custom_target(${Coverage_NAME}_rostest_cpp_info
@@ -556,6 +562,7 @@ function(ADD_CODE_COVERAGE)
     add_custom_target(
       ${Coverage_NAME}_nosetests_python_xml
       DEPENDS
+        _run_tests_${PROJECT_NAME}_nosetests
         ${PROJECT_BINARY_DIR}/${Coverage_NAME}_nosetests_python.xml
       )
   else()
@@ -590,7 +597,8 @@ function(ADD_CODE_COVERAGE)
     add_custom_target(
       ${Coverage_NAME}_pytests_python_xml
       DEPENDS
-      _run_tests_${PROJECT_NAME}_pytests
+        _run_tests_${PROJECT_NAME}_pytests
+        ${PROJECT_BINARY_DIR}/${Coverage_NAME}_pytests_python.xml
     )
   else()
     add_custom_target(${Coverage_NAME}_pytests_python_xml
@@ -635,7 +643,9 @@ function(ADD_CODE_COVERAGE)
     )
     add_custom_target(
       ${Coverage_NAME}_rostest_python_xml
-      DEPENDS ${PROJECT_BINARY_DIR}/${Coverage_NAME}_rostest_python.xml
+      DEPENDS
+        _run_tests_${PROJECT_NAME}_rostest
+        ${PROJECT_BINARY_DIR}/${Coverage_NAME}_rostest_python.xml
     )
   else()
     add_custom_target(${Coverage_NAME}_rostest_python_xml
