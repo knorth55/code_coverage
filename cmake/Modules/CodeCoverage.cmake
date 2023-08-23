@@ -518,7 +518,13 @@ function(ADD_CODE_COVERAGE)
         ${CMAKE_COMMAND} -E copy
         ${PROJECT_BINARY_DIR}/nosetests_python_coverage/${Coverage_NAME}_nosetests_python.xml
         ${PROJECT_BINARY_DIR}/${Coverage_NAME}_nosetests_python.xml
-      COMMAND mv ${PROJECT_BINARY_DIR}/.coverage* ${PROJECT_BINARY_DIR}/nosetests_python_coverage/
+      COMMAND
+        ${CMAKE_COMMAND} -E copy
+        ${PROJECT_BINARY_DIR}/.coverage*
+        ${PROJECT_BINARY_DIR}/nosetests_python_coverage/
+      COMMAND
+        ${CMAKE_COMMAND} -E remove 
+        ${PROJECT_BINARY_DIR}/.coverage*
       WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
       DEPENDS
         _run_tests_${PROJECT_NAME}_nosetests
