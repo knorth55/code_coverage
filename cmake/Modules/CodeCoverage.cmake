@@ -321,9 +321,11 @@ function(ADD_CODE_COVERAGE)
         ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info)
   else()
     # dummy targets for the case test and coverage are not enabled
-    add_custom_target(_run_tests_${PROJECT_NAME}_python_base_coverage_report
+    add_custom_target(
+      _run_tests_${PROJECT_NAME}_python_base_coverage_report
       COMMAND "${CMAKE_COMMAND}" "-E" "echo" "Skipping python base coverage report target.")
-    add_custom_target(_run_tests_${PROJECT_NAME}_cpp_base_coverage_report
+    add_custom_target(
+      _run_tests_${PROJECT_NAME}_cpp_base_coverage_report
       COMMAND "${CMAKE_COMMAND}" "-E" "echo" "Skipping cpp base coverage report target.")
   endif()
 
@@ -527,7 +529,7 @@ function(ADD_CODE_COVERAGE)
         ${PROJECT_BINARY_DIR}/.coverage*
         ${PROJECT_BINARY_DIR}/nosetests_python_coverage/
       COMMAND
-        ${CMAKE_COMMAND} -E remove 
+        ${CMAKE_COMMAND} -E remove
         ${PROJECT_BINARY_DIR}/.coverage*
       WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
       DEPENDS
