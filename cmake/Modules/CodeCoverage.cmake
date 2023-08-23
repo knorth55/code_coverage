@@ -252,7 +252,9 @@ function(ADD_CODE_COVERAGE)
     # hidden test target which depends on building all tests and cleaning test results
     add_custom_target(
       _run_tests_${PROJECT_NAME}_python_base_coverage_report
-      DEPENDS ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_python.xml)
+      DEPENDS
+        ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_python.xml
+    )
 
     # create cpp base coverage report
     # lcov -c -i -d in ${PROJECT_BINARY_DIR} list up cpp and header files built with coverage flags
@@ -308,11 +310,14 @@ function(ADD_CODE_COVERAGE)
         || echo "WARNING: No base cpp report to move"
       WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
       COMMENT "Generating base cpp coverage report."
-      DEPENDS ${Coverage_NAME}_cleanup_cpp
+      DEPENDS
+        ${Coverage_NAME}_cleanup_cpp
     )
     # hidden test target which depends on building all tests and cleaning test results
-    add_custom_target(_run_tests_${PROJECT_NAME}_cpp_base_coverage_report
-                      DEPENDS ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info)
+    add_custom_target(
+      _run_tests_${PROJECT_NAME}_cpp_base_coverage_report
+      DEPENDS
+        ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info)
   else()
     # dummy targets for the case test and coverage are not enabled
     add_custom_target(_run_tests_${PROJECT_NAME}_python_base_coverage_report
@@ -320,7 +325,6 @@ function(ADD_CODE_COVERAGE)
     add_custom_target(_run_tests_${PROJECT_NAME}_cpp_base_coverage_report
       COMMAND "${CMAKE_COMMAND}" "-E" "echo" "Skipping cpp base coverage report target.")
   endif()
-
 
   # this dependency is to generate base report before tests
   add_dependencies(
