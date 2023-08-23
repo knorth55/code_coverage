@@ -360,8 +360,9 @@ function(ADD_CODE_COVERAGE)
         _run_tests_${PROJECT_NAME}_gtest
     )
     add_custom_target(
-      _create_coverage_report_${PROJECT_NAME}_gtest
+      _create_coverage_report_${PROJECT_NAME}_gtest_cpp
       DEPENDS
+        _run_tests_${PROJECT_NAME}_gtest
         ${PROJECT_BINARY_DIR}/gtest_cpp_coverage/${Coverage_NAME}_gtest_cpp.info.original
     )
 
@@ -399,7 +400,7 @@ function(ADD_CODE_COVERAGE)
       WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
       DEPENDS
         _run_tests_${PROJECT_NAME}_gtest
-        _create_coverage_report_${PROJECT_NAME}_gtest
+        _create_coverage_report_${PROJECT_NAME}_gtest_cpp
         ${PROJECT_BINARY_DIR}/gtest_cpp_coverage/${Coverage_NAME}_gtest_cpp.info.original
         _run_tests_${PROJECT_NAME}_cpp_base_coverage_report
         ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info
@@ -434,8 +435,9 @@ function(ADD_CODE_COVERAGE)
         _run_tests_${PROJECT_NAME}_rostest
     )
     add_custom_target(
-      _create_coverage_report_${PROJECT_NAME}_rostest
+      _create_coverage_report_${PROJECT_NAME}_rostest_cpp
       DEPENDS
+        _run_tests_${PROJECT_NAME}_rostest
         ${PROJECT_BINARY_DIR}/rostest_cpp_coverage/${Coverage_NAME}_rostest_cpp.info.original
     )
 
@@ -474,7 +476,7 @@ function(ADD_CODE_COVERAGE)
       WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
       DEPENDS
         _run_tests_${PROJECT_NAME}_rostest
-        _create_coverage_report_${PROJECT_NAME}_rostest
+        _create_coverage_report_${PROJECT_NAME}_rostest_cpp
         ${PROJECT_BINARY_DIR}/rostest_cpp_coverage/${Coverage_NAME}_rostest_cpp.info.original
         _run_tests_${PROJECT_NAME}_cpp_base_coverage_report
         ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info
@@ -489,13 +491,13 @@ function(ADD_CODE_COVERAGE)
       DEPENDS _run_tests_${PROJECT_NAME})
   endif()
 
-  # run _create_coverage_report_${PROJECT_NAME}_gtest
+  # run _create_coverage_report_${PROJECT_NAME}_gtest_cpp
   # before all rostest target tests_${PROJECT_NAME}_rostest
   if(TARGET tests_${PROJECT_NAME}_rostest AND
-      TARGET _create_coverage_report_${PROJECT_NAME}_gtest)
+      TARGET _create_coverage_report_${PROJECT_NAME}_gtest_cpp)
     add_dependencies(
       tests_${PROJECT_NAME}_rostest
-      _create_coverage_report_${PROJECT_NAME}_gtest
+      _create_coverage_report_${PROJECT_NAME}_gtest_cpp
     )
   endif()
 
