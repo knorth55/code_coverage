@@ -544,9 +544,11 @@ function(ADD_CODE_COVERAGE)
         ${CMAKE_COMMAND} -E copy
         ${PROJECT_BINARY_DIR}/.coverage*
         ${PROJECT_BINARY_DIR}/nosetests_python_coverage/
+        || true
       COMMAND
         ${CMAKE_COMMAND} -E remove
         ${PROJECT_BINARY_DIR}/.coverage*
+        || true
       WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
       DEPENDS
         _run_tests_${PROJECT_NAME}_nosetests
