@@ -639,7 +639,6 @@ function(ADD_CODE_COVERAGE)
       DEPENDS
         _create_rostest_python_coverage_dir
         _run_tests_${PROJECT_NAME}_rostest
-        ${Coverage_NAME}_nosetests_python_xml
     )
     add_custom_target(
       ${Coverage_NAME}_rostest_python_xml
