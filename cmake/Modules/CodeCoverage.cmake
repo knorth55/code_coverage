@@ -168,16 +168,13 @@ function(ADD_CODE_COVERAGE)
   # catkin tools executes _run_tests_${PROJECT_NAME}.
   # _run_tests_${PROJECT_NAME} is for cleaning test result and run tests.
   # https://github.com/ros/catkin/commit/f931db5c8c14475a9d74ffc65b9dbbe45c98d11d
-  if(TARGET _run_tests_${PROJECT_NAME})
-    set(TEST_FOUND TRUE)
-  else()
+  if(NOT TARGET _run_tests_${PROJECT_NAME})
     # create hidden meta target which depends on hidden test targets
     # which depend on clean_test_results
     add_custom_target(_run_tests_${PROJECT_NAME})
     # run_tests depends on this hidden target hierarchy
     # to clear test results before running all tests
     add_dependencies(run_tests _run_tests_${PROJECT_NAME})
-    set(TEST_FOUND FALSE)
   endif()
 
   if(NOT DEFINED CATKIN_ENABLE_TESTING OR CATKIN_ENABLE_TESTING)
@@ -337,78 +334,165 @@ function(ADD_CODE_COVERAGE)
     _run_tests_${PROJECT_NAME}_python_base_coverage_report
     _run_tests_${PROJECT_NAME}_cpp_base_coverage_report)
 
-  if(TEST_FOUND)
-    # Create C++ coverage report
+  # Create gtest C++ coverage report
+  if(TARGET _run_tests_${PROJECT_NAME}_gtest)
+    # create original gtest C++ coverage report
     add_custom_command(
       OUTPUT
-        ${PROJECT_BINARY_DIR}/${Coverage_NAME}_cpp.info
-        ${PROJECT_BINARY_DIR}/cpp_coverage/${Coverage_NAME}.info
-      COMMAND export PYTHONIOENCODING=UTF-8
+        ${PROJECT_BINARY_DIR}/gtest_cpp_coverage/${Coverage_NAME}_gtest_cpp.info.original
       # Capturing lcov counters and generating report
+      COMMAND
+        ${CMAKE_COMMAND} -E make_directory
+        ${PROJECT_BINARY_DIR}/gtest_cpp_coverage
       COMMAND
         ${LCOV_PATH} ${LCOV_EXTRA_FLAGS}
         --directory . --capture
-        --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info
-        || echo "WARNING: No cpp report to output"
+        --output-file
+        ${PROJECT_BINARY_DIR}/gtest_cpp_coverage/${Coverage_NAME}_gtest_cpp.info.original
+      # Cleanup lcov for rostest
+      COMMAND ${LCOV_PATH} --directory . --zerocounters
+      WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+      DEPENDS
+        _run_tests_${PROJECT_NAME}_gtest
+    )
+    add_custom_target(
+      _create_coverage_report_${PROJECT_NAME}_gtest
+      DEPENDS
+        ${PROJECT_BINARY_DIR}/gtest_cpp_coverage/${Coverage_NAME}_gtest_cpp.info.original
+    )
+
+    # refine gtest C++ coverage report
+    add_custom_command(
+      OUTPUT
+        ${PROJECT_BINARY_DIR}/${Coverage_NAME}_gtest_cpp.info
+        ${PROJECT_BINARY_DIR}/gtest_cpp_coverage/${Coverage_NAME}_gtest_cpp.info
+        ${PROJECT_BINARY_DIR}/gtest_cpp_coverage/${Coverage_NAME}_gtest_cpp.info.total
+        ${PROJECT_BINARY_DIR}/gtest_cpp_coverage/${Coverage_NAME}_gtest_cpp.info.removed
+        ${PROJECT_BINARY_DIR}/gtest_cpp_coverage/${Coverage_NAME}_gtest_cpp.info.cleaned
       # add baseline counters
       COMMAND
         ${LCOV_PATH} ${LCOV_EXTRA_FLAGS}
         -a ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info
-        -a ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info
-        --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.total
-        || echo "WARNING: No cpp report to output"
+        -a ${PROJECT_BINARY_DIR}/gtest_cpp_coverage/${Coverage_NAME}_gtest_cpp.info.original
+        --output-file ${PROJECT_BINARY_DIR}/gtest_cpp_coverage/${Coverage_NAME}_gtest_cpp.info.total
+      COMMAND
+        ${LCOV_PATH} ${LCOV_EXTRA_FLAGS} --remove
+        ${PROJECT_BINARY_DIR}/gtest_cpp_coverage/${Coverage_NAME}_gtest_cpp.info.total
+        ${LCOV_REMOVES}
+        --output-file
+        ${PROJECT_BINARY_DIR}/gtest_cpp_coverage/${Coverage_NAME}_gtest_cpp.info.removed
       COMMAND
         ${LCOV_PATH} ${LCOV_EXTRA_FLAGS}
-        --remove ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.total ${LCOV_REMOVES}
-        --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.removed
-        ||  echo "WARNING: No cpp report to output"
-      COMMAND
-        ${LCOV_PATH} ${LCOV_EXTRA_FLAGS}
-        --extract ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.removed "'*${REAL_SOURCE_DIR}*'"
-        --output-file ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.cleaned
-        || echo "WARNING: No cpp report to output"
-      COMMAND
-        ${CMAKE_COMMAND} -E make_directory
-        ${PROJECT_BINARY_DIR}/cpp_coverage
-        || echo "WARNING: Error to create cpp coverage dir"
+        --extract
+        ${PROJECT_BINARY_DIR}/gtest_cpp_coverage/${Coverage_NAME}_gtest_cpp.info.removed
+        "'*${REAL_SOURCE_DIR}*'"
+        --output-file
+        ${PROJECT_BINARY_DIR}/gtest_cpp_coverage/${Coverage_NAME}_gtest_cpp.info.cleaned
       COMMAND
         ${CMAKE_COMMAND} -E copy
-        ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.cleaned
-        ${PROJECT_BINARY_DIR}/${Coverage_NAME}_cpp.info
-        || echo "WARNING: No cpp report to copy"
-      COMMAND
-        ${CMAKE_COMMAND} -E copy
-        ${PROJECT_BINARY_DIR}/${Coverage_NAME}_cpp.info
-        ${PROJECT_BINARY_DIR}/cpp_coverage/${Coverage_NAME}_cpp.info
-        || echo "WARNING: No cpp report to copy"
-      COMMAND
-        ${CMAKE_COMMAND} -E rename
-        ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info
-        ${PROJECT_BINARY_DIR}/cpp_coverage/${Coverage_NAME}.info
-        || echo "WARNING: No cpp report to move"
-      COMMAND
-        ${CMAKE_COMMAND} -E rename
-        ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.total
-        ${PROJECT_BINARY_DIR}/cpp_coverage/${Coverage_NAME}.info.total
-        || echo "WARNING: No cpp report to move"
-      COMMAND
-        ${CMAKE_COMMAND} -E rename
-        ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.removed
-        ${PROJECT_BINARY_DIR}/cpp_coverage/${Coverage_NAME}.info.removed
-        || echo "WARNING: No cpp report to move"
-      COMMAND
-        ${CMAKE_COMMAND} -E rename
-        ${PROJECT_BINARY_DIR}/${Coverage_NAME}.info.cleaned
-        ${PROJECT_BINARY_DIR}/cpp_coverage/${Coverage_NAME}.info.cleaned
-        || echo "WARNING: No cpp report to move"
+        ${PROJECT_BINARY_DIR}/gtest_cpp_coverage/${Coverage_NAME}_gtest_cpp.info.cleaned
+        ${PROJECT_BINARY_DIR}/${Coverage_NAME}_gtest_cpp.info
       WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
       DEPENDS
-        _run_tests_${PROJECT_NAME}
+        _run_tests_${PROJECT_NAME}_gtest
+        _create_coverage_report_${PROJECT_NAME}_gtest
+        ${PROJECT_BINARY_DIR}/gtest_cpp_coverage/${Coverage_NAME}_gtest_cpp.info.original
         _run_tests_${PROJECT_NAME}_cpp_base_coverage_report
         ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info
     )
-    add_custom_target(${Coverage_NAME}_cpp_info
-                      DEPENDS ${PROJECT_BINARY_DIR}/${Coverage_NAME}_cpp.info)
+    add_custom_target(
+      ${Coverage_NAME}_gtest_cpp_info
+      DEPENDS ${PROJECT_BINARY_DIR}/${Coverage_NAME}_gtest_cpp.info)
+  else()
+    # dummy targets for the case if there is no gtest
+    add_custom_target(${Coverage_NAME}_gtest_cpp_info
+      COMMAND "${CMAKE_COMMAND}" "-E" "echo" "Skipping gtest cpp coverage report target."
+      DEPENDS _run_tests_${PROJECT_NAME})
+  endif()
+
+  # Create rostest C++ coverage report
+  if (TARGET _run_tests_${PROJECT_NAME}_rostest)
+    # create original rostest C++ coverage report
+    add_custom_command(
+      OUTPUT
+        ${PROJECT_BINARY_DIR}/rostest_cpp_coverage/${Coverage_NAME}_rostest_cpp.info.original
+      # Capturing lcov counters and generating report
+      COMMAND
+        ${CMAKE_COMMAND} -E make_directory
+        ${PROJECT_BINARY_DIR}/rostest_cpp_coverage
+      COMMAND
+        ${LCOV_PATH} ${LCOV_EXTRA_FLAGS}
+        --directory . --capture
+        --output-file
+        ${PROJECT_BINARY_DIR}/rostest_cpp_coverage/${Coverage_NAME}_rostest_cpp.info.original
+      WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+      DEPENDS
+        _run_tests_${PROJECT_NAME}_rostest
+    )
+    add_custom_target(
+      _create_coverage_report_${PROJECT_NAME}_rostest
+      DEPENDS
+        ${PROJECT_BINARY_DIR}/rostest_cpp_coverage/${Coverage_NAME}_rostest_cpp.info.original
+    )
+
+    # refine rostest C++ coverage report
+    add_custom_command(
+      OUTPUT
+        ${PROJECT_BINARY_DIR}/${Coverage_NAME}_rostest_cpp.info
+        ${PROJECT_BINARY_DIR}/rostest_cpp_coverage/${Coverage_NAME}_rostest_cpp.info
+        ${PROJECT_BINARY_DIR}/rostest_cpp_coverage/${Coverage_NAME}_rostest_cpp.info.total
+        ${PROJECT_BINARY_DIR}/rostest_cpp_coverage/${Coverage_NAME}_rostest_cpp.info.removed
+        ${PROJECT_BINARY_DIR}/rostest_cpp_coverage/${Coverage_NAME}_rostest_cpp.info.cleaned
+      # add baseline counters
+      COMMAND
+        ${LCOV_PATH} ${LCOV_EXTRA_FLAGS}
+        -a ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info
+        -a ${PROJECT_BINARY_DIR}/rostest_cpp_coverage/${Coverage_NAME}_rostest_cpp.info.original
+        --output-file ${PROJECT_BINARY_DIR}/rostest_cpp_coverage/${Coverage_NAME}_rostest_cpp.info.total
+      COMMAND
+        ${LCOV_PATH} ${LCOV_EXTRA_FLAGS} --remove
+        ${PROJECT_BINARY_DIR}/rostest_cpp_coverage/${Coverage_NAME}_rostest_cpp.info.total
+        ${LCOV_REMOVES}
+        --output-file
+        ${PROJECT_BINARY_DIR}/rostest_cpp_coverage/${Coverage_NAME}_rostest_cpp.info.removed
+      COMMAND
+        ${LCOV_PATH} ${LCOV_EXTRA_FLAGS}
+        --extract
+        ${PROJECT_BINARY_DIR}/rostest_cpp_coverage/${Coverage_NAME}_rostest_cpp.info.removed
+        "'*${REAL_SOURCE_DIR}*'"
+        --output-file
+        ${PROJECT_BINARY_DIR}/rostest_cpp_coverage/${Coverage_NAME}_rostest_cpp.info.cleaned
+      COMMAND
+        ${CMAKE_COMMAND} -E copy
+        ${PROJECT_BINARY_DIR}/rostest_cpp_coverage/${Coverage_NAME}_rostest_cpp.info.cleaned
+        ${PROJECT_BINARY_DIR}/${Coverage_NAME}_rostest_cpp.info
+      WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+      DEPENDS
+        _run_tests_${PROJECT_NAME}_rostest
+        _create_coverage_report_${PROJECT_NAME}_rostest
+        ${PROJECT_BINARY_DIR}/rostest_cpp_coverage/${Coverage_NAME}_rostest_cpp.info.original
+        _run_tests_${PROJECT_NAME}_cpp_base_coverage_report
+        ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_cpp.info
+    )
+    add_custom_target(
+      ${Coverage_NAME}_rostest_cpp_info
+      DEPENDS ${PROJECT_BINARY_DIR}/${Coverage_NAME}_rostest_cpp.info)
+  else()
+    # dummy targets for the case if there is no rostest
+    add_custom_target(${Coverage_NAME}_rostest_cpp_info
+      COMMAND "${CMAKE_COMMAND}" "-E" "echo" "Skipping rostest cpp coverage report target."
+      DEPENDS _run_tests_${PROJECT_NAME})
+  endif()
+
+  # run _create_coverage_report_${PROJECT_NAME}_gtest
+  # before all rostest target tests_${PROJECT_NAME}_rostest
+  if (TARGET tests_${PROJECT_NAME}_rostest AND
+      TARGET _create_coverage_report_${PROJECT_NAME}_gtest)
+    add_dependencies(
+      tests_${PROJECT_NAME}_rostest
+      _create_coverage_report_${PROJECT_NAME}_gtest
+    )
+  endif()
 
     add_custom_command(
       OUTPUT
@@ -520,7 +604,8 @@ function(ADD_CODE_COVERAGE)
   # when the files are generated by add_custom_command
   add_custom_target(${Coverage_NAME}
     DEPENDS
-      ${Coverage_NAME}_cpp_info
+      ${Coverage_NAME}_gtest_cpp_info
+      ${Coverage_NAME}_rostest_cpp_info
       ${Coverage_NAME}_nosetests_python_xml
       ${Coverage_NAME}_pytests_python_xml
       ${Coverage_NAME}_python_xml
@@ -531,7 +616,9 @@ function(ADD_CODE_COVERAGE)
   add_custom_command(TARGET ${Coverage_NAME} POST_BUILD
     COMMAND ;
     COMMENT
-      "Lcov code coverage info report saved in ${PROJECT_BINARY_DIR}/${Coverage_NAME}_cpp.info."
+      "Lcov code coverage info report saved in \
+      ${PROJECT_BINARY_DIR}/${Coverage_NAME}_gtest_cpp.info,\
+      ${PROJECT_BINARY_DIR}/${Coverage_NAME}_rostest_cpp.info."
   )
 
   # Show info where to find the Python report
