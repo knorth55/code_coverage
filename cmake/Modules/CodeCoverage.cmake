@@ -563,7 +563,7 @@ function(ADD_CODE_COVERAGE)
   endif()
 
   # Create python pytests coverage report
-  if(TARGET _run_tests_${PROJECT}_pytests)
+  if(TARGET _run_tests_${PROJECT_NAME}_pytests)
     add_custom_command(
       OUTPUT
         ${PROJECT_BINARY_DIR}/${Coverage_NAME}_pytests_python.xml
@@ -583,12 +583,12 @@ function(ADD_CODE_COVERAGE)
         fi
       WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/pytests_python_coverage
       DEPENDS
-        _run_tests_${PROJECT_NAME}
+        _run_tests_${PROJECT_NAME}_pytests
     )
     add_custom_target(
       ${Coverage_NAME}_pytests_python_xml
       DEPENDS
-        _run_tests_${PROJECT}_pytests
+      _run_tests_${PROJECT_NAME}_pytests
     )
   else()
     add_custom_target(${Coverage_NAME}_pytests_python_xml
