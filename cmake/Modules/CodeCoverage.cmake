@@ -239,10 +239,11 @@ function(ADD_CODE_COVERAGE)
         ${INCLUDE_FLAGS} ${OMIT_FLAGS}
         || echo "WARNING: No base python xml to output"
       COMMAND
-        ${CMAKE_COMMAND} -E copy
-        ${PROJECT_BINARY_DIR}/python_base_coverage/${Coverage_NAME}_base_python.xml
-        ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_python.xml
-        || echo "WARNING: No base python xml to copy"
+        if [ -f ${PROJECT_BINARY_DIR}/python_base_coverage/${Coverage_NAME}_base_python.xml ]\; then
+          ${CMAKE_COMMAND} -E copy
+          ${PROJECT_BINARY_DIR}/python_base_coverage/${Coverage_NAME}_base_python.xml
+          ${PROJECT_BINARY_DIR}/${Coverage_NAME}_base_python.xml\;
+        fi
       WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/python_base_coverage
       COMMENT "Generating base python coverage report."
       DEPENDS
@@ -514,10 +515,13 @@ function(ADD_CODE_COVERAGE)
         ${PYTHON_COVERAGE_PATH} xml -o
         ${PROJECT_BINARY_DIR}/nosetests_python_coverage/${Coverage_NAME}_nosetests_python.xml
         ${INCLUDE_FLAGS} ${OMIT_FLAGS}
+        || echo "WARNING: nosetests python coverage to report"
       COMMAND
-        ${CMAKE_COMMAND} -E copy
-        ${PROJECT_BINARY_DIR}/nosetests_python_coverage/${Coverage_NAME}_nosetests_python.xml
-        ${PROJECT_BINARY_DIR}/${Coverage_NAME}_nosetests_python.xml
+        if [ -f  ${PROJECT_BINARY_DIR}/nosetests_python_coverage/${Coverage_NAME}_nosetests_python.xml ] \;
+          ${CMAKE_COMMAND} -E copy
+          ${PROJECT_BINARY_DIR}/nosetests_python_coverage/${Coverage_NAME}_nosetests_python.xml
+          ${PROJECT_BINARY_DIR}/${Coverage_NAME}_nosetests_python.xml\;
+        fi
       COMMAND
         ${CMAKE_COMMAND} -E copy
         ${PROJECT_BINARY_DIR}/.coverage*
@@ -552,10 +556,13 @@ function(ADD_CODE_COVERAGE)
         ${PYTHON_COVERAGE_PATH} xml -o
         ${PROJECT_BINARY_DIR}/pytests_python_coverage/${Coverage_NAME}_pytests_python.xml
         ${INCLUDE_FLAGS} ${OMIT_FLAGS}
+        || echo "WARNING: No pytests python coverage to report"
       COMMAND
-        ${CMAKE_COMMAND} -E copy
-        ${PROJECT_BINARY_DIR}/pytests_python_coverage/${Coverage_NAME}_pytests_python.xml
-        ${PROJECT_BINARY_DIR}/${Coverage_NAME}_pytests_python.xml
+        if [ -f ${PROJECT_BINARY_DIR}/pytests_python_coverage/${Coverage_NAME}_pytests_python.xml ]\; then
+          ${CMAKE_COMMAND} -E copy
+          ${PROJECT_BINARY_DIR}/pytests_python_coverage/${Coverage_NAME}_pytests_python.xml
+          ${PROJECT_BINARY_DIR}/${Coverage_NAME}_pytests_python.xml\;
+        fi
       WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/pytests_python_coverage
       DEPENDS
         _run_tests_${PROJECT_NAME}
@@ -593,15 +600,14 @@ function(ADD_CODE_COVERAGE)
         ${PYTHON_COVERAGE_PATH} xml  -o
         ${PROJECT_BINARY_DIR}/rostest_python_coverage/${Coverage_NAME}_rostest_python.xml
         ${INCLUDE_FLAGS} ${OMIT_FLAGS}
+        || echo "WARNING: No rostest python coverage to report"
       COMMAND
-        ${CMAKE_COMMAND} -E copy
-        ${PROJECT_BINARY_DIR}/rostest_python_coverage//${Coverage_NAME}_rostest_python.xml
-        ${PROJECT_BINARY_DIR}/${Coverage_NAME}_rostest_python.xml
-      COMMAND
-        ${CMAKE_COMMAND} -E copy
-        ${COVERAGE_DIR}/.coverage*
-        ${PROJECT_BINARY_DIR}/rostest_python_coverage/
-      WORKING_DIRECTORY ${COVERAGE_DIR}
+        if [ -f ${PROJECT_BINARY_DIR}/rostest_python_coverage/${Coverage_NAME}_rostest_python.xml ]\; then
+          ${CMAKE_COMMAND} -E copy
+          ${PROJECT_BINARY_DIR}/rostest_python_coverage//${Coverage_NAME}_rostest_python.xml
+          ${PROJECT_BINARY_DIR}/${Coverage_NAME}_rostest_python.xml\;
+        fi
+      WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/rostest_python_coverage
       DEPENDS
         _run_tests_${PROJECT_NAME}_rostest
         ${Coverage_NAME}_nosetests_python_xml
